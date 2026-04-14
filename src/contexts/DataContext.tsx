@@ -109,10 +109,10 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
                 status: 'Pending',
                 requesterName: req.requesterName,
                 requesterId: req.requesterId || 'anonymous',
-                location: JSON.stringify(req.location || {}),
-                proofUrls: uploadedUrls,  // Send as real array, not JSON string
-                neededItems: JSON.stringify(req.neededItems || []),
-                createdAt: new Date().toISOString(),
+                location: JSON.stringify(req.location || {}).substring(0, 99),
+                proofUrls: uploadedUrls,  // Array type column
+                neededItems: JSON.stringify(req.neededItems || []),  // String type column
+                createdAt: Date.now(),  // Integer type column
             };
 
             const created = await databases.createDocument(DB_ID, REQ_COL_ID, ID.unique(), docData);
