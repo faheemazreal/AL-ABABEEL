@@ -656,7 +656,7 @@ const AuthPage = () => {
                   </Button>
 
                   <Button
-                    onClick={() => account.createOAuth2Session(OAuthProvider.Google, window.location.origin + '/', window.location.origin + '/', ['profile', 'email'])}
+                    onClick={() => account.createOAuth2Session(OAuthProvider.Google, window.location.origin, window.location.origin, ['profile', 'email'])}
                     className="w-full h-14 bg-white text-black border-2 border-gray-200 hover:bg-gray-50 rounded-2xl font-black text-sm flex items-center justify-center gap-3 shadow-none transition-colors"
                   >
                     <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
@@ -2429,10 +2429,13 @@ const ProfilePage = () => {
 
 const AppContent = () => {
   const { user, loading } = useAuth();
-  const [showSplash, setShowSplash] = useState(true);
+  // Only show splash if we don't have a cached session hint, and not on a sub-page
+  const [showSplash, setShowSplash] = useState(!localStorage.getItem('aidconnect_user'));
   const location = useLocation();
   const navigate = useNavigate();
 
+  // If we have a user while splash is still showing (e.g. background check finished faster),
+  // we could potentially skip it, but let's keep it consistent for now.
   if (showSplash) return <SplashScreen onFinish={() => setShowSplash(false)} />;
   if (loading) return null;
   if (!user) return <AuthPage />;

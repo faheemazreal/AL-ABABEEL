@@ -54,6 +54,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                         reputation: 0,
                     };
                     setUser(mappedUser);
+                    localStorage.setItem('aidconnect_user', JSON.stringify(mappedUser));
                     setLoading(false);
                     return;
                 }
