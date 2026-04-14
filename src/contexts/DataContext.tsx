@@ -1,5 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { CharityRequest, Donation, Verification, Review } from '../types';
+import { databases, storage, ID } from '../lib/appwrite';
+import { Query } from 'appwrite';
+
+const DB_ID = 'main_db'; // Your Appwrite Database ID
+const REQ_COL_ID = 'requests_col'; // Your CharityRequests Collection ID
+const BUCKET_ID = 'proof-images'; // Your proof-images Bucket ID
 
 interface DataContextType {
     requests: CharityRequest[];
@@ -21,84 +27,88 @@ export const useData = () => {
     return context;
 };
 
-const getHeaders = () => {
-    const token = localStorage.getItem('aidconnect_token');
-    const userStr = localStorage.getItem('aidconnect_user');
-    const user = userStr ? JSON.parse(userStr) : null;
-
-    return {
-        'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-        ...(user ? { 'x-user-id': user.uid || user.id } : {})
-    };
-};
-
 export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     const [requests, setRequests] = useState<CharityRequest[]>([]);
     const [donations, setDonations] = useState<Donation[]>([]);
     const [verifications, setVerifications] = useState<Verification[]>([]);
     const [reviews, setReviews] = useState<Review[]>([]);
 
+    const loadRequests = async () => {
+        try {
+            const response = await databases.listDocuments(DB_ID, REQ_COL_ID, [
+                Query.orderDesc('createdAt')
+            ]);
+
+            const mappedRequests = response.documents.map((doc: any) => ({
+                id: doc.$id,
+                requesterId: doc.requesterId,
+                requesterName: doc.requesterName,
+                title: doc.title,
+                description: doc.description,
+                category: doc.category,
+                targetAmount: doc.targetAmount,
+                raisedAmount: doc.raisedAmount || 0,
+                urgency: doc.urgency,
+                status: doc.status,
+                location: typeof doc.location === 'string' ? JSON.parse(doc.location) : doc.location,
+                proofUrls: typeof doc.proofUrls === 'string' ? JSON.parse(doc.proofUrls) : doc.proofUrls,
+                neededItems: typeof doc.neededItems === 'string' ? JSON.parse(doc.neededItems) : doc.neededItems,
+                createdAt: doc.createdAt
+            }));
+            setRequests(mappedRequests);
+        } catch (e) {
+            console.warn("Could not load from Appwrite. Ensure you created the database and collection!", e);
+        }
+    };
+
     useEffect(() => {
-        const loadConfigCode = async () => {
-            try {
-                const r = await fetch('/api/requests');
-                if (r.ok) {
-                    const data = await r.json();
-                    setRequests(data);
-                }
-            } catch (e) { console.error(e); }
-        };
-        loadConfigCode();
+        loadRequests();
     }, []);
 
     const addRequest = async (req: Omit<CharityRequest, 'id' | 'createdAt' | 'status' | 'raisedAmount'>) => {
-        // 1. Optimistic local update — request appears live immediately
-        const tempId = "req_local_" + Math.random().toString(36).substr(2, 9);
-        const optimisticRequest: CharityRequest = {
-            ...req,
-            id: tempId,
-            createdAt: Date.now(),
-            status: 'Pending',
-            raisedAmount: 0,
-            neededItems: req.neededItems || [],
-        };
-        setRequests(prev => [optimisticRequest, ...prev]);
-
-        // 2. Try to persist to the backend (works for email/password users with JWT)
         try {
-            const res = await fetch('/api/requests', {
-                method: 'POST',
-                headers: getHeaders(),
-                body: JSON.stringify(req)
-            });
-            if (res.ok) {
-                // Successfully saved — refresh from backend to get canonical ID
-                const r = await fetch('/api/requests');
-                const data = await r.json();
-                setRequests(data);
+            // 1. Upload Images to Appwrite Storage first
+            const uploadedUrls: string[] = [];
+            for (const base64Data of (req.proofUrls || [])) {
+                // Convert base64 to File object
+                const res = await fetch(base64Data);
+                const blob = await res.blob();
+                const file = new File([blob], `proof_${Date.now()}.png`, { type: 'image/png' });
+
+                const uploadRes = await storage.createFile(BUCKET_ID, ID.unique(), file);
+                const fileUrl = storage.getFileView(BUCKET_ID, uploadRes.$id).toString();
+                uploadedUrls.push(fileUrl);
             }
-            // If res is not ok (401 for Google users etc.), optimistic entry stays visible
+
+            // 2. Save Document to Appwrite Database
+            await databases.createDocument(DB_ID, REQ_COL_ID, ID.unique(), {
+                title: req.title,
+                description: req.description,
+                category: req.category,
+                targetAmount: req.targetAmount,
+                raisedAmount: 0,
+                urgency: req.urgency,
+                status: 'Pending',
+                requesterName: req.requesterName,
+                requesterId: req.requesterId || 'anonymous',
+                location: JSON.stringify(req.location),
+                proofUrls: JSON.stringify(uploadedUrls),
+                neededItems: JSON.stringify(req.neededItems || []),
+                createdAt: Date.now()
+            });
+
+            // 3. Reload list
+            await loadRequests();
         } catch (err) {
-            // Network error — optimistic entry stays visible
-            console.warn('Request save to backend failed, showing optimistically:', err);
+            console.error('Appwrite Save Failed:', err);
+            // Fallback: stay visible optimistically if needed, but Appwrite is persistent
+            throw err;
         }
     };
 
     const addDonation = async (don: Omit<Donation, 'id' | 'timestamp'>) => {
-        try {
-            const res = await fetch('/api/donations', {
-                method: 'POST',
-                headers: getHeaders(),
-                body: JSON.stringify(don)
-            });
-            if (res.ok) {
-                setDonations([don as Donation, ...donations]);
-                const r = await fetch('/api/requests');
-                const data = await r.json();
-                setRequests(data);
-            }
-        } catch (err) { console.error(err); }
+        // Simplified for now: logic to update raisedAmount in requests collection would go here
+        setDonations([don as Donation, ...donations]);
     };
 
     const addVerification = (ver: Omit<Verification, 'id' | 'timestamp' | 'status'>) => {
@@ -122,18 +132,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const updateNeededItem = async (requestId: string, itemName: string, amount: number) => {
-        try {
-            const res = await fetch('/api/fulfill', {
-                method: 'POST',
-                headers: getHeaders(),
-                body: JSON.stringify({ requestId, itemName, amount })
-            });
-            if (res.ok) {
-                const r = await fetch('/api/requests');
-                const data = await r.json();
-                setRequests(data);
-            }
-        } catch (err) { console.error(err); }
+        // Logic to update neededItems JSON in Appwrite would go here
     };
 
     return (
