@@ -42,10 +42,7 @@ const mapDoc = (doc: any): CharityRequest => ({
         catch { return { lat: 0, lng: 0, address: '' }; }
     })(),
     proofUrls: Array.isArray(doc.proofUrls) ? doc.proofUrls : (() => { try { return JSON.parse(doc.proofUrls || '[]'); } catch { return []; } })(),
-    neededItems: (() => {
-        try { return typeof doc.neededItems === 'string' ? JSON.parse(doc.neededItems) : (doc.neededItems || []); }
-        catch { return []; }
-    })(),
+    neededItems: Array.isArray(doc.neededItems) ? doc.neededItems : (() => { try { return JSON.parse(doc.neededItems || '[]'); } catch { return []; } })(),
     createdAt: typeof doc.createdAt === 'string' ? new Date(doc.createdAt).getTime() : (doc.createdAt || Date.now()),
 });
 
@@ -114,7 +111,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
                 requesterId: req.requesterId || 'anonymous',
                 location: JSON.stringify(req.location || {}),
                 proofUrls: uploadedUrls,  // Send as real array, not JSON string
-                neededItems: JSON.stringify(req.neededItems || []),
+                neededItems: req.neededItems || [],  // Send as real array
                 createdAt: new Date().toISOString(),
             };
 

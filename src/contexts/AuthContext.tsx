@@ -27,17 +27,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     useEffect(() => {
         const checkAuth = async () => {
-            // 1. Detect if we are returning from an OAuth redirect
             const params = new URLSearchParams(window.location.search);
             const isOAuthRedirect = params.has('secret') && params.has('userId');
 
+            // STEP 1: Instantly restore from localStorage (no token required)
+            // This prevents the login page from flashing on every reload
+            const savedUser = localStorage.getItem('aidconnect_user');
+            if (savedUser) {
+                setUser(JSON.parse(savedUser));
+                setLoading(false);
+                // Don't return — still verify session with Appwrite in background
+            }
+
+            // STEP 2: Verify with Appwrite (updates photo, confirms session is alive)
             try {
-                // If redirecting, wait a split second for SDK to settle
                 if (isOAuthRedirect) {
-                    await new Promise(r => setTimeout(r, 500));
+                    await new Promise(r => setTimeout(r, 800));
                 }
 
-                // 2. Attempt Appwrite Google OAuth Session Retrieval
                 const session = await account.get();
                 if (session) {
                     let photoURL = 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + session.$id;
@@ -50,7 +57,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                                 if (gData.picture) photoURL = gData.picture;
                             }
                         }
-                    } catch (e) { /* fallback */ }
+                    } catch (e) { /* fallback to avatar */ }
 
                     const mappedUser: AppUser = {
                         uid: session.$id,
@@ -61,7 +68,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                         reputation: 0,
                     };
 
-                    // Force clean URL by removing OAuth params
                     if (isOAuthRedirect) {
                         window.history.replaceState({}, document.title, window.location.pathname);
                     }
@@ -69,22 +75,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     setUser(mappedUser);
                     localStorage.setItem('aidconnect_user', JSON.stringify(mappedUser));
                     setLoading(false);
-                    return;
+                } else if (!savedUser) {
+                    // No Appwrite session AND no localStorage — user is truly logged out
+                    setLoading(false);
                 }
             } catch (err: any) {
-                console.error("Auth check failed:", err);
+                console.error('Auth check:', err.message);
                 if (isOAuthRedirect) {
-                    localStorage.setItem('aidconnect_last_error', err.message || "Failed to sync session");
+                    localStorage.setItem('aidconnect_last_error', err.message || 'Failed to sync session');
+                }
+                if (!savedUser) {
+                    // No session anywhere — show login
+                    setLoading(false);
                 }
             }
-
-            // 3. Local backend fallback
-            const savedUser = localStorage.getItem('aidconnect_user');
-            const token = localStorage.getItem('aidconnect_token');
-            if (savedUser && token) {
-                setUser(JSON.parse(savedUser));
-            }
-            setLoading(false);
         };
         checkAuth();
     }, []);
