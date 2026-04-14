@@ -19,7 +19,7 @@ export const useAuth = () => {
     return context;
 };
 
-import { account } from '../lib/appwrite';
+import { account, ID } from '../lib/appwrite';
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<AppUser | null>(null);
@@ -93,45 +93,63 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         checkAuth();
     }, []);
 
-    const handleAuthResponse = async (res: Response) => {
-        if (!res.ok) {
-            const text = await res.text();
-            throw new Error(text);
-        }
-        const data = await res.json();
-        setUser(data.user);
-        localStorage.setItem('aidconnect_user', JSON.stringify(data.user));
-        localStorage.setItem('aidconnect_token', data.token);
-    };
 
     const login = async (email: string, password: string) => {
-        const res = await fetch('/api/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
-        });
-        await handleAuthResponse(res);
+        // Use Appwrite SDK directly — works on Vercel, not just locally
+        await account.createEmailPasswordSession(email, password);
+        const session = await account.get();
+        const mappedUser: AppUser = {
+            uid: session.$id,
+            email: session.email,
+            displayName: session.name || email.split('@')[0],
+            photoURL: `https://ui-avatars.com/api/?name=${encodeURIComponent(session.name || email)}&background=random`,
+            role: 'donor',
+            reputation: 0,
+        };
+        setUser(mappedUser);
+        localStorage.setItem('aidconnect_user', JSON.stringify(mappedUser));
     };
 
     const demoLogin = async (role: UserRole) => {
-        const res = await fetch('/api/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ role })
-        });
-        await handleAuthResponse(res);
+        // Demo login is local-only, keep as is for development
+        try {
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ role })
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setUser(data.user);
+                localStorage.setItem('aidconnect_user', JSON.stringify(data.user));
+                localStorage.setItem('aidconnect_token', data.token);
+            }
+        } catch (e) { console.warn('Demo login not available on Vercel'); }
     };
 
     const register = async (userData: any) => {
-        const res = await fetch('/api/auth/register', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(userData)
-        });
-        await handleAuthResponse(res);
+        const { email, password, firstName, lastName } = userData;
+        const displayName = `${firstName} ${lastName}`.trim();
+        // 1. Create Appwrite account
+        await account.create(ID.unique(), email, password, displayName);
+        // 2. Log in immediately after
+        await account.createEmailPasswordSession(email, password);
+        const session = await account.get();
+        const mappedUser: AppUser = {
+            uid: session.$id,
+            email: session.email,
+            displayName: session.name || displayName,
+            photoURL: `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=random`,
+            role: 'donor',
+            reputation: 0,
+        };
+        setUser(mappedUser);
+        localStorage.setItem('aidconnect_user', JSON.stringify(mappedUser));
     };
 
     const logout = () => {
+        // Sign out from Appwrite too
+        account.deleteSession('current').catch(() => { });
         setUser(null);
         localStorage.removeItem('aidconnect_user');
         localStorage.removeItem('aidconnect_token');
