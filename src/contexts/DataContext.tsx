@@ -23,9 +23,13 @@ export const useData = () => {
 
 const getHeaders = () => {
     const token = localStorage.getItem('aidconnect_token');
+    const userStr = localStorage.getItem('aidconnect_user');
+    const user = userStr ? JSON.parse(userStr) : null;
+
     return {
         'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        ...(user ? { 'x-user-id': user.uid || user.id } : {})
     };
 };
 

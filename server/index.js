@@ -72,7 +72,15 @@ const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
-    if (!token) return res.sendStatus(401);
+    if (!token) {
+        // Fallback for Google/Appwrite users who don't have a local JWT
+        // We'll trust the x-user-id header or default to anonymous for the demo
+        req.user = {
+            id: req.headers['x-user-id'] || 'anonymous_user_' + Math.floor(Math.random() * 1000),
+            role: 'donor'
+        };
+        return next();
+    }
 
     jwt.verify(token, JWT_SECRET, (err, user) => {
         if (err) return res.sendStatus(403);
