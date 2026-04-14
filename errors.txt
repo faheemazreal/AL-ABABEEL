@@ -1,0 +1,2 @@
+src/pages/HomePage.tsx(90,34): error TS2322: Type '{ key: any; req: any; }' is not assignable to type '{ req: CharityRequest; }'.
+  Property 'key' does not exist on type '{ req: CharityRequest; }'.
