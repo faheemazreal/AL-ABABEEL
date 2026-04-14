@@ -128,9 +128,11 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
             setRequests(prev => prev.map(r => r.id === tempId ? mapDoc(created) : r));
 
         } catch (err: any) {
-            console.error('[DataContext] SAVE FAILED:', err.message);
-            // Optimistic entry stays visible to the creator even if save fails
-            // This is acceptable for demo; in production you'd show an error banner
+            const msg = err?.message || JSON.stringify(err);
+            console.error('[DataContext] SAVE FAILED:', msg, err);
+            // Temporarily alert so we can see the EXACT error
+            alert('DEBUG - Appwrite Save Error:\n' + msg);
+            // Optimistic entry stays visible to the creator
         }
     };
 
