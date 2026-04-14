@@ -651,7 +651,12 @@ const AuthPage = () => {
                       <span className="text-xs font-bold text-gray-500">I agree to the <span className="text-green-600 underline">Terms of Service</span> and <span className="text-green-600 underline">Privacy Policy</span>.</span>
                     </div>
 
-                    {errorMsg && <div className="text-red-500 text-xs font-bold bg-red-100 p-2 rounded">{errorMsg}</div>}
+                    {errorMsg && (
+                      <div className="text-red-500 text-[10px] font-black uppercase p-3 bg-red-50 border-2 border-red-200 rounded-xl flex flex-col gap-1">
+                        <div className="flex items-center gap-2"><AlertCircle size={12} /> {errorMsg}</div>
+                        <div className="text-[8px] opacity-70">Project: 69db91100005d8796634 | {window.location.hostname}</div>
+                      </div>
+                    )}
 
                     <div className="space-y-3">
                       <Button
@@ -659,7 +664,7 @@ const AuthPage = () => {
                           if (isLogin) {
                             setLoading(true); setErrorMsg("");
                             try { await login(formData.email, formData.password); }
-                            catch { setErrorMsg("Invalid credentials."); }
+                            catch (err: any) { setErrorMsg(err.message || "Invalid credentials."); }
                             finally { setLoading(false); }
                           } else { handleNext(); }
                         }}
@@ -2445,8 +2450,9 @@ const ProfilePage = () => {
 
 const AppContent = () => {
   const { user, loading } = useAuth();
-  // Only show splash if we don't have a cached session hint, and not on a sub-page
-  const [showSplash, setShowSplash] = useState(!localStorage.getItem('aidconnect_user'));
+  // Skip splash if we have a user, or if we are CURRENTLY in an OAuth redirect flow
+  const isOAuthRedirect = window.location.search.includes('userId=');
+  const [showSplash, setShowSplash] = useState(!localStorage.getItem('aidconnect_user') && !isOAuthRedirect);
   const location = useLocation();
   const navigate = useNavigate();
 
