@@ -27,8 +27,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     useEffect(() => {
         const checkAuth = async () => {
+            // 1. Detect if we are returning from an OAuth redirect
+            const params = new URLSearchParams(window.location.search);
+            const isOAuthRedirect = params.has('secret') && params.has('userId');
+
             try {
-                // 1. Attempt Appwrite Google OAuth Session Retrieval
+                // If redirecting, wait a split second for SDK to settle
+                if (isOAuthRedirect) {
+                    await new Promise(r => setTimeout(r, 500));
+                }
+
+                // 2. Attempt Appwrite Google OAuth Session Retrieval
                 const session = await account.get();
                 if (session) {
                     let photoURL = 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + session.$id;
@@ -41,28 +50,33 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                                 if (gData.picture) photoURL = gData.picture;
                             }
                         }
-                    } catch (e) {
-                        // Silent fallback to standard Dicebear if fetch fails
-                    }
+                    } catch (e) { /* fallback */ }
 
                     const mappedUser: AppUser = {
                         uid: session.$id,
                         email: session.email,
                         displayName: session.name || 'Google User',
                         photoURL,
-                        role: 'donor', // Google OAuth default role
+                        role: 'donor',
                         reputation: 0,
                     };
+
+                    // Force clean URL by removing OAuth params
+                    if (isOAuthRedirect) {
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                    }
+
                     setUser(mappedUser);
                     localStorage.setItem('aidconnect_user', JSON.stringify(mappedUser));
                     setLoading(false);
                     return;
                 }
             } catch (err) {
-                // No active Appwrite session, proceed to local Express backend check
+                // If it was a redirect but account.get() failed, it's a real auth error
+                console.error("Auth check failed:", err);
             }
 
-            // 2. Local backend fallback
+            // 3. Local backend fallback
             const savedUser = localStorage.getItem('aidconnect_user');
             const token = localStorage.getItem('aidconnect_token');
             if (savedUser && token) {
