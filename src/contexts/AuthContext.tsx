@@ -71,9 +71,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     setLoading(false);
                     return;
                 }
-            } catch (err) {
-                // If it was a redirect but account.get() failed, it's a real auth error
+            } catch (err: any) {
                 console.error("Auth check failed:", err);
+                if (isOAuthRedirect) {
+                    localStorage.setItem('aidconnect_last_error', err.message || "Failed to sync session");
+                }
             }
 
             // 3. Local backend fallback

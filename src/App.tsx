@@ -530,7 +530,7 @@ const SplashScreen = ({ onFinish }: { onFinish: () => void }) => {
 const AuthPage = () => {
   const { login, register } = useAuth();
   const [step, setStep] = useState(1);
-  const [errorMsg, setErrorMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState(localStorage.getItem('aidconnect_last_error') || "");
   const [loading, setLoading] = useState(false);
   const [isLogin, setIsLogin] = useState(false);
   const [formData, setFormData] = useState({
@@ -542,6 +542,12 @@ const AuthPage = () => {
     otp: '',
     location: ''
   });
+
+  React.useEffect(() => {
+    if (localStorage.getItem('aidconnect_last_error')) {
+      localStorage.removeItem('aidconnect_last_error');
+    }
+  }, []);
 
   const handleNext = () => setStep(s => s + 1);
   const handleBack = () => setStep(s => s - 1);
