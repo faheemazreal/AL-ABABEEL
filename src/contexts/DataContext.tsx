@@ -109,7 +109,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
                 title: req.title,
                 description: req.description,
                 category: req.category,
-                targetAmount: req.targetAmount,
+                targetAmount: Number(req.targetAmount) || 0,
                 raisedAmount: 0,
                 urgency: req.urgency,
                 status: 'Pending',
@@ -118,7 +118,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
                 location: JSON.stringify(req.location || {}),
                 proofUrls: JSON.stringify(uploadedUrls),
                 neededItems: JSON.stringify(req.neededItems || []),
-                createdAt: new Date().toISOString(), // String is safe for all column types
+                createdAt: new Date().toISOString(),
             };
 
             const created = await databases.createDocument(DB_ID, REQ_COL_ID, ID.unique(), docData);
@@ -130,8 +130,6 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
         } catch (err: any) {
             const msg = err?.message || JSON.stringify(err);
             console.error('[DataContext] SAVE FAILED:', msg, err);
-            // Temporarily alert so we can see the EXACT error
-            alert('DEBUG - Appwrite Save Error:\n' + msg);
             // Optimistic entry stays visible to the creator
         }
     };
