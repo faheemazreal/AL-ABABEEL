@@ -14,7 +14,8 @@ import {
   Wallet, Plus, Users, Zap, CheckCircle2, AlertCircle, Phone, X, Leaf, HandHeart,
   Map as MapIcon, Share2, MessageSquare, Star, User, Home, Eye, LogOut, Check, ShoppingBag, Truck,
   Hand, Camera, Clock, ChevronRight, Award, Filter, Store, Package, ExternalLink, Copy, TrendingUp,
-  FileText, LayoutGrid, Info, ShieldAlert, CheckCircle, Navigation,
+  FileText, LayoutGrid, Info, ShieldAlert, CheckCircle, Navigation, History, ThumbsUp, Flag,
+  Minus, Shield, Trash2, Ban, BarChart3, Gift,
 } from 'lucide-react';
 
 import {
@@ -242,8 +243,12 @@ const UPIDonationModal: React.FC<{
   onClose: () => void;
   upiId: string;
   title: string;
-}> = ({ isOpen, onClose, upiId, title }) => {
+  amount?: number;
+}> = ({ isOpen, onClose, upiId, title, amount = 100 }) => {
   const [copied, setCopied] = useState(false);
+  const [notInstalled, setNotInstalled] = useState(false);
+
+  const upiUrl = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(title)}&am=${amount}&cu=INR`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(upiId);
@@ -251,31 +256,77 @@ const UPIDonationModal: React.FC<{
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleUPIPay = () => {
+    // Try to open UPI deep link
+    const a = document.createElement('a');
+    a.href = upiUrl;
+    a.click();
+    // Detect if app didn't open (user stays on page)
+    setTimeout(() => setNotInstalled(true), 1500);
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) { onClose(); setNotInstalled(false); } }}>
       <DialogContent className="border-4 border-black rounded-[2rem] p-8 max-w-sm">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-black italic uppercase tracking-tighter">Donate to {title}</DialogTitle>
+          <DialogTitle className="text-2xl font-black italic uppercase tracking-tighter">Pay ₹{amount} via UPI</DialogTitle>
           <DialogDescription className="font-bold text-gray-600">
-            Transfer directly to the requester using any UPI app.
+            Use Google Pay, PhonePe, Paytm or any UPI app.
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-6 py-4">
-          <div className="p-6 bg-yellow-50 border-2 border-black border-dashed rounded-2xl flex flex-col items-center gap-4">
-            <div className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Requester UPI ID</div>
-            <div className="text-xl font-black italic tracking-tight">{upiId}</div>
-            <Button
-              variant="outline"
-              className="border-2 border-black font-black uppercase text-xs h-10 px-6"
-              onClick={handleCopy}
-            >
-              {copied ? <Check size={16} className="mr-2" /> : <Copy size={16} className="mr-2" />}
-              {copied ? 'Copied' : 'Copy ID'}
-            </Button>
+        <div className="space-y-4 py-2">
+          {/* UPI Deep Link Buttons */}
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { name: 'Google Pay', scheme: `gpay://upi/pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(title)}&am=${amount}&cu=INR`, color: 'bg-blue-50 border-blue-200', emoji: '🟢' },
+              { name: 'PhonePe', scheme: `phonepe://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(title)}&am=${amount}&cu=INR`, color: 'bg-purple-50 border-purple-200', emoji: '🟣' },
+              { name: 'Paytm', scheme: `paytmmp://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(title)}&am=${amount}&cu=INR`, color: 'bg-sky-50 border-sky-200', emoji: '🔵' },
+            ].map(app => (
+              <button
+                key={app.name}
+                onClick={() => {
+                  const a = document.createElement('a');
+                  a.href = app.scheme;
+                  a.click();
+                  setTimeout(() => setNotInstalled(true), 1500);
+                }}
+                className={`p-3 ${app.color} border-2 rounded-2xl flex flex-col items-center gap-1 font-black text-[10px] uppercase tracking-widest hover:opacity-80 transition-opacity`}
+              >
+                <span className="text-2xl">{app.emoji}</span>
+                {app.name}
+              </button>
+            ))}
           </div>
-          <Button className="w-full h-14 bg-black text-white border-2 border-black font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(34,197,94,1)]">
-            Open UPI App <ExternalLink size={18} className="ml-2" />
+
+          <Button
+            onClick={handleUPIPay}
+            className="w-full h-12 bg-black text-white border-2 border-black font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(34,197,94,1)]"
+          >
+            Open Any UPI App <ExternalLink size={16} className="ml-2" />
           </Button>
+
+          {/* Fallback: copy UPI ID */}
+          {notInstalled && (
+            <div className="p-4 bg-yellow-50 border-2 border-yellow-400 border-dashed rounded-2xl space-y-3">
+              <p className="text-xs font-black uppercase text-yellow-700">⚠️ App not detected? Copy UPI ID manually:</p>
+              <div className="flex items-center gap-2 bg-white border-2 border-black rounded-xl p-3">
+                <span className="flex-1 font-black text-sm truncate">{upiId}</span>
+                <Button size="sm" variant="outline" onClick={handleCopy} className="border-2 border-black h-8 font-black text-xs shrink-0">
+                  {copied ? <Check size={12} /> : <Copy size={12} />}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          <div className="p-4 bg-gray-50 border-2 border-black border-dashed rounded-2xl">
+            <div className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-1">UPI ID</div>
+            <div className="font-black italic flex items-center justify-between gap-2">
+              <span className="truncate text-sm">{upiId}</span>
+              <button onClick={handleCopy} className="shrink-0 text-green-600 font-black text-xs uppercase flex items-center gap-1">
+                {copied ? <><Check size={12} /> Copied!</> : <><Copy size={12} /> Copy</>}
+              </button>
+            </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
@@ -1085,7 +1136,7 @@ const HomePage = () => {
 
 const RequestDetailPage = () => {
   const { id } = useParams();
-  const { requests, donations, verifications, reviews, addDonation, addReview, updateNeededItem } = useData();
+  const { requests, donations, verifications, reviews, addDonation, addReview, updateNeededItem, validateRequest, flagRequest } = useData();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [isDonating, setIsDonating] = useState(false);
@@ -1169,8 +1220,9 @@ const RequestDetailPage = () => {
       <UPIDonationModal
         isOpen={showUPI}
         onClose={() => setShowUPI(false)}
-        upiId="charity@okaxis"
+        upiId={request.requesterId ? `${request.requesterId.substring(0, 8)}@okaxis` : 'charity@okaxis'}
         title={request.title}
+        amount={parseInt(donationAmount) || 100}
       />
       <AnimatePresence>
         {showSuccess && (
@@ -1287,7 +1339,7 @@ const RequestDetailPage = () => {
       <div className="px-6 mt-16 space-y-8">
         <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl border-2 border-black border-dashed">
           <Avatar className="w-12 h-12 border-2 border-black">
-            <AvatarImage src={`https://picsum.photos/seed/${request.requesterId}/100/100`} />
+            <AvatarImage src={request.requesterId === user?.uid && user?.photoURL ? user.photoURL : `https://picsum.photos/seed/${request.requesterId}/100/100`} />
             <AvatarFallback>{request.requesterName[0]}</AvatarFallback>
           </Avatar>
           <div>
@@ -1300,6 +1352,46 @@ const RequestDetailPage = () => {
         <div className="space-y-4">
           <h3 className="text-xl font-black italic uppercase tracking-tight">The Cause</h3>
           <p className="text-gray-600 font-bold leading-relaxed">{request.description}</p>
+        </div>
+
+        {/* Community Validation */}
+        <div className="p-6 bg-white border-4 border-black rounded-[2rem] shadow-[8px_8px_0px_0px_rgba(0,0,0,0.05)]">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 bg-blue-100 rounded-xl border-2 border-black flex items-center justify-center">
+              <Shield size={20} className="text-blue-600" />
+            </div>
+            <div>
+              <h4 className="text-lg font-black italic uppercase tracking-tight">Community Validation</h4>
+              <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Help others trust this request</p>
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => user && validateRequest(request.id, user.uid)}
+              className={`flex-1 flex items-center justify-center gap-2 h-14 rounded-2xl border-4 border-black font-black uppercase text-xs tracking-widest transition-all ${(request.validatedBy || []).includes(user?.uid || '')
+                ? 'bg-green-500 text-black shadow-none translate-x-0.5 translate-y-0.5'
+                : 'bg-green-100 text-green-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-green-200'
+                }`}
+            >
+              <ThumbsUp size={18} />
+              Valid ({request.validationCount || 0})
+            </motion.button>
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => user && flagRequest(request.id, user.uid)}
+              className={`flex-1 flex items-center justify-center gap-2 h-14 rounded-2xl border-4 border-black font-black uppercase text-xs tracking-widest transition-all ${(request.flaggedBy || []).includes(user?.uid || '')
+                ? 'bg-red-500 text-white shadow-none translate-x-0.5 translate-y-0.5'
+                : 'bg-red-100 text-red-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-red-200'
+                }`}
+            >
+              <Flag size={18} />
+              Suspicious ({request.flagCount || 0})
+            </motion.button>
+          </div>
+          {!user && (
+            <p className="text-center text-xs font-bold text-gray-400 mt-3">Log in to vote on this request</p>
+          )}
         </div>
 
         <VisualDonation amount={request.raisedAmount} target={request.targetAmount} category={request.category} />
