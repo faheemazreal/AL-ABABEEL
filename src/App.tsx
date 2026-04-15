@@ -2670,6 +2670,17 @@ let DefaultIcon = L.icon({
 
 L.Marker.prototype.options.icon = DefaultIcon;
 
+const MapBoundsFitter = ({ requests }: { requests: any[] }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (requests.length === 0) return;
+    const L = (window as any).L;
+    const bounds = L.latLngBounds(requests.map(r => [r.location.lat, r.location.lng]));
+    map.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 });
+  }, [requests, map]);
+  return null;
+};
+
 const MapPage = () => {
   const { requests } = useData();
   const navigate = useNavigate();
@@ -2713,6 +2724,7 @@ const MapPage = () => {
         className="h-full w-full z-0"
         zoomControl={false}
       >
+        <MapBoundsFitter requests={filtered} />
         <TileLayer
           url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
           attribution='&copy; OpenStreetMap contributors &copy; CARTO'
