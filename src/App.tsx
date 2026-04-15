@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createContext, useContext } from 'react';
+Ôªøimport React, { useState, useEffect, createContext, useContext } from 'react';
 import {
   BrowserRouter as Router,
   Routes,
@@ -82,36 +82,36 @@ const Particle = ({ x, y }: ParticleProps) => (
 const SuccessAnimation = ({ category, amount }: { category: RequestCategory, amount: number }) => {
   const configs: Record<string, { emoji: string; items: string[]; label: string; bg: string; accent: string }> = {
     Food: {
-      emoji: 'YçΩÔ∏è',
-      items: ['Yçz', 'Y•>', 'Yçs', 'Y•-', 'Y•©', 'YçZ', 'Y•¶', 'Yç<'],
+      emoji: 'üçΩÔ∏è',
+      items: ['üçû', 'ü•õ', 'üçö', 'ü•ó', 'ü•©', 'üçé', 'ü•¶', 'üçã'],
       label: `${Math.max(1, Math.floor(amount / 50))} meals provided`,
       bg: 'bg-orange-50',
       accent: 'text-orange-500',
     },
     Medical: {
-      emoji: 'Yè•',
-      items: ['Y'S', 'Y©∫', 'Y©π', 'Y'?', 'Yß™', 'Y©ª'],
+      emoji: 'üè•',
+      items: ['üíä', 'ü©∫', 'ü©π', 'üíâ', 'üß™', 'ü©ª'],
       label: `${Math.max(1, Math.floor(amount / 100))} kits funded`,
       bg: 'bg-red-50',
       accent: 'text-red-500',
     },
     Education: {
-      emoji: 'YZ'',
-      items: ['Y"s', '‚oèÔ∏è', 'Y"ê', 'Y"'', 'Y-SÔ∏è', 'Y"è'],
+      emoji: 'üéí',
+      items: ['üìö', '‚úèÔ∏è', 'üìê', 'üìí', 'üñäÔ∏è', 'üìè'],
       label: `${Math.max(1, Math.floor(amount / 80))} kits provided`,
       bg: 'bg-blue-50',
       accent: 'text-blue-500',
     },
     Emergency: {
-      emoji: 'Y>°Ô∏è',
-      items: ['‚ù§Ô∏è', 'Y§ù', '‚oS', 'Y'™', 'YOY', 'YTè'],
+      emoji: 'üõ°Ô∏è',
+      items: ['‚ù§Ô∏è', 'ü§ù', '‚úä', 'üí™', 'üåü', 'üôè'],
       label: `Emergency support sent`,
       bg: 'bg-yellow-50',
       accent: 'text-yellow-600',
     },
     Clothing: {
-      emoji: 'Y'.',
-      items: ['Y's', 'Y'-', 'Yß£', 'Yß•', 'Y'Y', 'Yß§'],
+      emoji: 'üëï',
+      items: ['üëö', 'üëó', 'üß£', 'üß•', 'üëü', 'üß§'],
       label: `${Math.max(1, Math.floor(amount / 60))} sets funded`,
       bg: 'bg-purple-50',
       accent: 'text-purple-500',
@@ -179,7 +179,7 @@ const SuccessAnimation = ({ category, amount }: { category: RequestCategory, amo
 
 // Confetti particle for PaymentSuccessOverlay
 const ConfettiParticle = ({ delay }: { delay: number }) => {
-  const emojis = ['YZ?', '‚≠ê', '‚o®', 'Y'>', 'YOY', 'YZS'];
+  const emojis = ['üéâ', '‚≠ê', '‚ú®', 'üíõ', 'üåü', 'üéä'];
   const emoji = emojis[Math.floor(delay * emojis.length * 7) % emojis.length];
   const left = ((delay * 137.5) % 100);
   return (
@@ -223,7 +223,7 @@ const PaymentSuccessOverlay = ({ category, amount, onClose }: { category: Reques
 
       <div className="space-y-1">
         <h2 className="text-5xl font-black italic tracking-tighter uppercase leading-none">Impact Created!</h2>
-        <p className="text-black font-bold uppercase tracking-widest text-sm">You just donated ‚,π{amount}</p>
+        <p className="text-black font-bold uppercase tracking-widest text-sm">You just donated ‚Çπ{amount}</p>
       </div>
 
       <SuccessAnimation category={category} amount={amount} />
@@ -235,10 +235,10 @@ const PaymentSuccessOverlay = ({ category, amount, onClose }: { category: Reques
         className="bg-black text-white p-5 rounded-3xl border-4 border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,0.2)]"
       >
         <p className="font-black italic text-lg mb-1">
-          {category === 'Food' ? 'YçΩÔ∏è A plate is being filled right now!' :
-            category === 'Medical' ? 'Y'S Medicine is on its way!' :
-              category === 'Education' ? 'Y"s A student\'s future is brighter!' :
-                'Y>°Ô∏è Emergency support is dispatched!'}
+          {category === 'Food' ? 'üçΩÔ∏è A plate is being filled right now!' :
+            category === 'Medical' ? 'üíä Medicine is on its way!' :
+              category === 'Education' ? 'üìö A student\'s future is brighter!' :
+                'üõ°Ô∏è Emergency support is dispatched!'}
         </p>
         <p className="text-[10px] font-black uppercase text-yellow-400 tracking-widest">Transaction Verified ¬∑ Blockchain Secured</p>
       </motion.div>
@@ -247,7 +247,7 @@ const PaymentSuccessOverlay = ({ category, amount, onClose }: { category: Reques
         onClick={onClose}
         className="w-full h-16 bg-white text-black border-4 border-black font-black uppercase tracking-widest text-xl rounded-2xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
       >
-        Continue Helping YOç
+        Continue Helping üåç
       </Button>
     </motion.div>
   </motion.div>
@@ -271,10 +271,10 @@ const VisualDonation = ({ amount, target, category }: { amount: number, target: 
 
   const getLabel = () => {
     switch (category) {
-      case 'Food': return `‚,π200 = 1 Meal Plate`;
-      case 'Medical': return `‚,π500 = 1 Medicine Kit`;
-      case 'Education': return `‚,π100 = 1 Stationery Set`;
-      default: return `‚,π100 = 1 Impact Unit`;
+      case 'Food': return `‚Çπ200 = 1 Meal Plate`;
+      case 'Medical': return `‚Çπ500 = 1 Medicine Kit`;
+      case 'Education': return `‚Çπ100 = 1 Stationery Set`;
+      default: return `‚Çπ100 = 1 Impact Unit`;
     }
   };
 
@@ -294,7 +294,7 @@ const VisualDonation = ({ amount, target, category }: { amount: number, target: 
           {getIcon()}
           <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">{getLabel()}</span>
         </div>
-        <span className="text-2xl font-black italic tracking-tighter">‚,π{safeAmount.toLocaleString()} <span className="text-sm text-gray-400 font-normal">/ ‚,π{safeTarget.toLocaleString()}</span></span>
+        <span className="text-2xl font-black italic tracking-tighter">‚Çπ{safeAmount.toLocaleString()} <span className="text-sm text-gray-400 font-normal">/ ‚Çπ{safeTarget.toLocaleString()}</span></span>
       </div>
       <div className="relative h-4 bg-gray-100 rounded-full overflow-hidden border-2 border-black">
         <motion.div
@@ -339,7 +339,7 @@ const UPIDonationModal: React.FC<{
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) { onClose(); setNotInstalled(false); } }}>
       <DialogContent className="border-4 border-black rounded-[2rem] p-8 max-w-sm">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-black italic uppercase tracking-tighter">Pay ‚,π{amount} via UPI</DialogTitle>
+          <DialogTitle className="text-2xl font-black italic uppercase tracking-tighter">Pay ‚Çπ{amount} via UPI</DialogTitle>
           <DialogDescription className="font-bold text-gray-600">
             Use Google Pay, PhonePe, Paytm or any UPI app.
           </DialogDescription>
@@ -348,9 +348,9 @@ const UPIDonationModal: React.FC<{
           {/* UPI Deep Link Buttons */}
           <div className="grid grid-cols-3 gap-3">
             {[
-              { name: 'Google Pay', scheme: `gpay://upi/pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(title)}&am=${amount}&cu=INR`, color: 'bg-blue-50 border-blue-200', emoji: 'YY¢' },
-              { name: 'PhonePe', scheme: `phonepe://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(title)}&am=${amount}&cu=INR`, color: 'bg-purple-50 border-purple-200', emoji: 'YY£' },
-              { name: 'Paytm', scheme: `paytmmp://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(title)}&am=${amount}&cu=INR`, color: 'bg-sky-50 border-sky-200', emoji: 'Y"µ' },
+              { name: 'Google Pay', scheme: `gpay://upi/pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(title)}&am=${amount}&cu=INR`, color: 'bg-blue-50 border-blue-200', emoji: 'üü¢' },
+              { name: 'PhonePe', scheme: `phonepe://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(title)}&am=${amount}&cu=INR`, color: 'bg-purple-50 border-purple-200', emoji: 'üü£' },
+              { name: 'Paytm', scheme: `paytmmp://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(title)}&am=${amount}&cu=INR`, color: 'bg-sky-50 border-sky-200', emoji: 'üîµ' },
             ].map(app => (
               <button
                 key={app.name}
@@ -378,7 +378,7 @@ const UPIDonationModal: React.FC<{
           {/* Fallback: copy UPI ID */}
           {notInstalled && (
             <div className="p-4 bg-yellow-50 border-2 border-yellow-400 border-dashed rounded-2xl space-y-3">
-              <p className="text-xs font-black uppercase text-yellow-700">‚s†Ô∏è App not detected? Copy UPI ID manually:</p>
+              <p className="text-xs font-black uppercase text-yellow-700">‚ö†Ô∏è App not detected? Copy UPI ID manually:</p>
               <div className="flex items-center gap-2 bg-white border-2 border-black rounded-xl p-3">
                 <span className="flex-1 font-black text-sm truncate">{upiId}</span>
                 <Button size="sm" variant="outline" onClick={handleCopy} className="border-2 border-black h-8 font-black text-xs shrink-0">
@@ -769,7 +769,7 @@ const AuthPage = () => {
                         <label className="text-xs font-bold text-gray-500">Create a Password <span className="text-red-500">*</span></label>
                         <Input
                           type="password"
-                          placeholder="‚?¢‚?¢‚?¢‚?¢‚?¢‚?¢‚?¢‚?¢"
+                          placeholder="‚Ä¢‚Ä¢‚Ä¢‚Ä¢‚Ä¢‚Ä¢‚Ä¢‚Ä¢"
                           className="h-14 rounded-xl border-gray-200 bg-gray-50 focus:bg-white transition-all font-bold"
                           value={formData.password}
                           onChange={e => setFormData({ ...formData, password: e.target.value })}
@@ -1223,7 +1223,7 @@ const HomePage = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-black truncate">{don.donorName}</div>
-                <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest truncate">donated <span className="text-green-600 font-black italic text-sm">‚,π{don.amount}</span></div>
+                <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest truncate">donated <span className="text-green-600 font-black italic text-sm">‚Çπ{don.amount}</span></div>
               </div>
             </motion.div>
           ))}
@@ -1234,9 +1234,9 @@ const HomePage = () => {
       <motion.div variants={itemVariants} className="px-6 mt-10">
         <div className="grid grid-cols-3 gap-3">
           {[
-            { label: 'Total Raised', value: `‚,π${requests.reduce((s, r) => s + r.raisedAmount, 0).toLocaleString()}`, emoji: 'Y'∞' },
-            { label: 'Requests', value: requests.length, emoji: 'Y"<' },
-            { label: 'Donors', value: donations.length, emoji: 'Y§ù' },
+            { label: 'Total Raised', value: `‚Çπ${requests.reduce((s, r) => s + r.raisedAmount, 0).toLocaleString()}`, emoji: 'üí∞' },
+            { label: 'Requests', value: requests.length, emoji: 'üìã' },
+            { label: 'Donors', value: donations.length, emoji: 'ü§ù' },
           ].map(stat => (
             <div key={stat.label} className="bg-white border-2 border-black rounded-2xl p-3 text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
               <div className="text-xl mb-1">{stat.emoji}</div>
@@ -1257,7 +1257,7 @@ const HomePage = () => {
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
-          {search && <button onClick={() => setSearch('')} className="text-gray-400 hover:text-black transition-colors text-sm font-black">‚o.</button>}
+          {search && <button onClick={() => setSearch('')} className="text-gray-400 hover:text-black transition-colors text-sm font-black">‚úï</button>}
         </div>
       </motion.div>
 
@@ -1296,14 +1296,14 @@ const HomePage = () => {
             onClick={() => navigate('/map')}
             className="text-[10px] font-black uppercase text-blue-500 border-b-2 border-blue-500/20 pb-1 tracking-widest"
           >
-            View Map ‚?'
+            View Map ‚Üí
           </motion.button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
           {filteredRequests.length === 0 ? (
             <div className="col-span-full flex flex-col items-center justify-center py-20 gap-4">
-              <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 3, repeat: Infinity }} className="text-6xl">Y"ç</motion.div>
+              <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 3, repeat: Infinity }} className="text-6xl">üîç</motion.div>
               <h4 className="text-2xl font-black italic uppercase">No requests found</h4>
               <p className="text-gray-400 font-bold text-sm uppercase tracking-widest">{search ? 'Try a different search term' : 'Be the first to create a request!'}</p>
               {search && <button onClick={() => setSearch('')} className="text-[10px] font-black uppercase text-blue-500 border-b border-blue-500/20">Clear Search</button>}
@@ -1461,7 +1461,7 @@ const RequestDetailPage = () => {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-500 uppercase">Target Amount (‚,π)</label>
+                <label className="text-xs font-bold text-gray-500 uppercase">Target Amount (‚Çπ)</label>
                 <Input type="number" value={editTarget} onChange={e => setEditTarget(e.target.value)} className="h-12 border-2 border-black rounded-xl font-bold" />
               </div>
               <div className="space-y-1">
@@ -1471,9 +1471,9 @@ const RequestDetailPage = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="High">Y"¥ High</SelectItem>
-                    <SelectItem value="Medium">YY° Medium</SelectItem>
-                    <SelectItem value="Low">YY¢ Low</SelectItem>
+                    <SelectItem value="High">üî¥ High</SelectItem>
+                    <SelectItem value="Medium">üü° Medium</SelectItem>
+                    <SelectItem value="Low">üü¢ Low</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -1565,7 +1565,7 @@ const RequestDetailPage = () => {
                   onClick={() => setReviewRating(star)}
                   className={`text-3xl transition-transform hover:scale-125 ${star <= reviewRating ? 'text-yellow-400' : 'text-gray-200'}`}
                 >
-                  ‚~.
+                  ‚òÖ
                 </button>
               ))}
             </div>
@@ -1716,14 +1716,14 @@ const RequestDetailPage = () => {
             </div>
             <div>
               <h4 className="text-xl font-black italic uppercase tracking-tight">Monetary Support</h4>
-              <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Help reach the target of ‚,π{(request.targetAmount || 0).toLocaleString()}</p>
+              <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Help reach the target of ‚Çπ{(request.targetAmount || 0).toLocaleString()}</p>
             </div>
           </div>
 
           <div className="space-y-6">
             <div className="flex gap-4">
               <div className="flex-1 relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-lg">‚,π</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-lg">‚Çπ</span>
                 <Input
                   type="number"
                   value={donationAmount}
@@ -1747,7 +1747,7 @@ const RequestDetailPage = () => {
                   onClick={() => setDonationAmount(amt)}
                   className={`flex-1 py-2 border-2 border-black rounded-xl font-black text-xs transition-all ${donationAmount === amt ? 'bg-black text-white' : 'bg-gray-50 hover:bg-gray-100'}`}
                 >
-                  ‚,π{amt}
+                  ‚Çπ{amt}
                 </button>
               ))}
             </div>
@@ -1827,7 +1827,7 @@ const RequestDetailPage = () => {
                         <div className="text-[10px] font-bold text-gray-400 uppercase">{new Date(don.timestamp).toLocaleTimeString()}</div>
                       </div>
                     </div>
-                    <div className="text-lg font-black italic tracking-tighter">‚,π{don.amount}</div>
+                    <div className="text-lg font-black italic tracking-tighter">‚Çπ{don.amount}</div>
                   </div>
                 ))}
               </div>
@@ -1892,7 +1892,7 @@ const RequestDetailPage = () => {
                         </div>
                         <div className="flex text-yellow-400 text-xs">
                           {Array.from({ length: 5 }).map((_, i) => (
-                            <span key={i}>{i < rev.rating ? '‚~.' : '‚~?'}</span>
+                            <span key={i}>{i < rev.rating ? '‚òÖ' : '‚òÜ'}</span>
                           ))}
                         </div>
                       </div>
@@ -1936,7 +1936,7 @@ const RequestDetailPage = () => {
                     onClick={() => setDonationAmount(amt)}
                     className={`flex-1 h-12 md:h-14 border-2 border-black rounded-xl md:rounded-2xl font-black text-xs md:text-base transition-all ${donationAmount === amt ? 'bg-black text-white shadow-[3px_3px_0px_0px_rgba(253,224,71,1)]' : 'bg-white text-black hover:bg-gray-50'}`}
                   >
-                    ‚,π{amt}
+                    ‚Çπ{amt}
                   </button>
                 ))}
               </div>
@@ -2046,7 +2046,7 @@ const FulfillNeedPage = () => {
                   <div className="min-w-0 flex-1">
                     <CardTitle className="text-lg md:text-xl font-black italic uppercase truncate">{vendor.name}</CardTitle>
                     <div className="flex items-center gap-2 mt-1">
-                      <Badge className="bg-yellow-400 text-black text-[8px] font-black">‚~. {vendor.rating}</Badge>
+                      <Badge className="bg-yellow-400 text-black text-[8px] font-black">‚òÖ {vendor.rating}</Badge>
                       <span className="text-[10px] font-bold text-gray-400 uppercase truncate">{vendor.distance} away</span>
                     </div>
                   </div>
@@ -2058,7 +2058,7 @@ const FulfillNeedPage = () => {
                   {vendor.items.map((item: any, i: number) => (
                     <div key={i} className="flex justify-between items-center p-3 bg-gray-50 rounded-xl border-2 border-black border-dashed">
                       <span className="font-bold text-sm truncate mr-2">{item.name}</span>
-                      <span className="font-black shrink-0">‚,π{item.price}</span>
+                      <span className="font-black shrink-0">‚Çπ{item.price}</span>
                     </div>
                   ))}
                 </div>
@@ -2096,13 +2096,13 @@ const FulfillNeedPage = () => {
             {selectedVendor.items.map((item: any, i: number) => (
               <div key={i} className="flex justify-between items-center">
                 <span className="font-bold truncate mr-4">{item.name}</span>
-                <span className="font-black shrink-0">‚,π{item.price}</span>
+                <span className="font-black shrink-0">‚Çπ{item.price}</span>
               </div>
             ))}
           </div>
           <div className="pt-4 border-t-2 border-black flex justify-between items-center">
             <span className="text-xl font-black italic uppercase">Total</span>
-            <span className="text-2xl font-black italic">‚,π{selectedVendor.items.reduce((acc: number, item: any) => acc + item.price, 0)}</span>
+            <span className="text-2xl font-black italic">‚Çπ{selectedVendor.items.reduce((acc: number, item: any) => acc + item.price, 0)}</span>
           </div>
         </div>
         <div className="p-8 bg-yellow-50 border-t-4 border-black space-y-4">
@@ -2265,10 +2265,8 @@ const CreateRequestPage = () => {
   const [gpsStatus, setGpsStatus] = useState<'idle' | 'loading' | 'success' | 'denied'>('idle');
   const [submitting, setSubmitting] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-
-  // Real GPS coords state ‚?" this is what gets saved to Appwrite
+  // Real GPS coords ‚Äî this is what gets saved to Appwrite
   const [locationCoords, setLocationCoords] = useState<{ lat: number; lng: number } | null>(null);
-
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -2279,7 +2277,22 @@ const CreateRequestPage = () => {
     upiId: localStorage.getItem('aidconnect_upi') || '',
   });
 
-  // Auto-trigger GPS when CreateRequestPage first loads
+  const reverseGeocode = async (lat: number, lng: number) => {
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
+        { headers: { 'Accept-Language': 'en' } }
+      );
+      const data = await res.json();
+      return data.display_name
+        ? data.display_name.split(',').slice(0, 3).join(', ')
+        : `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+    } catch {
+      return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+    }
+  };
+
+  // Auto-trigger GPS on page load
   useEffect(() => {
     if (!navigator.geolocation) return;
     setGpsStatus('loading');
@@ -2288,59 +2301,27 @@ const CreateRequestPage = () => {
         const { latitude, longitude } = pos.coords;
         setLocationCoords({ lat: latitude, lng: longitude });
         setGpsStatus('success');
-        // Reverse geocode using OpenStreetMap Nominatim (free, no API key)
-        try {
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`,
-            { headers: { 'Accept-Language': 'en' } }
-          );
-          const data = await res.json();
-          const address = data.display_name
-            ? data.display_name.split(',').slice(0, 3).join(', ')
-            : `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
-          setFormData(f => ({ ...f, location: address }));
-        } catch {
-          setFormData(f => ({ ...f, location: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}` }));
-        }
+        const address = await reverseGeocode(latitude, longitude);
+        setFormData(f => ({ ...f, location: address }));
       },
-      () => {
-        setGpsStatus('denied');
-      },
+      () => setGpsStatus('denied'),
       { timeout: 10000, maximumAge: 60000 }
     );
   }, []);
 
   const handleGps = () => {
-    if (!navigator.geolocation) {
-      setGpsStatus('denied');
-      return;
-    }
-    setGpsStatus('loading');
-    setGpsLoading(true);
+    if (!navigator.geolocation) { setGpsStatus('denied'); return; }
+    setGpsStatus('loading'); setGpsLoading(true);
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const { latitude, longitude } = pos.coords;
         setLocationCoords({ lat: latitude, lng: longitude });
         setGpsStatus('success');
-        try {
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`,
-            { headers: { 'Accept-Language': 'en' } }
-          );
-          const data = await res.json();
-          const address = data.display_name
-            ? data.display_name.split(',').slice(0, 3).join(', ')
-            : `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
-          setFormData(f => ({ ...f, location: address }));
-        } catch {
-          setFormData(f => ({ ...f, location: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}` }));
-        }
+        const address = await reverseGeocode(latitude, longitude);
+        setFormData(f => ({ ...f, location: address }));
         setGpsLoading(false);
       },
-      () => {
-        setGpsStatus('denied');
-        setGpsLoading(false);
-      },
+      () => { setGpsStatus('denied'); setGpsLoading(false); },
       { timeout: 10000 }
     );
   };
@@ -2353,7 +2334,7 @@ const CreateRequestPage = () => {
     }
     if (s === 2) {
       if (!formData.description.trim()) errs.description = 'Description is required.';
-      if (!formData.targetAmount || parseInt(formData.targetAmount) < 100) errs.targetAmount = 'Enter a valid target amount (min ‚,π100).';
+      if (!formData.targetAmount || parseInt(formData.targetAmount) < 100) errs.targetAmount = 'Enter a valid target amount (min \u20B9100).';
     }
     if (s === 3) {
       if (!formData.location.trim()) errs.location = 'Location is required.';
@@ -2362,17 +2343,13 @@ const CreateRequestPage = () => {
     return Object.keys(errs).length === 0;
   };
 
-  const goNext = (nextStep: number) => {
-    if (validate(step)) setStep(nextStep);
-  };
+  const goNext = (nextStep: number) => { if (validate(step)) setStep(nextStep); };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []) as File[];
     files.forEach(file => {
       const reader = new FileReader();
-      reader.onload = (ev) => {
-        setProofImages(prev => [...prev, ev.target?.result as string]);
-      };
+      reader.onload = (ev) => setProofImages(prev => [...prev, ev.target?.result as string]);
       reader.readAsDataURL(file);
     });
   };
@@ -2380,7 +2357,6 @@ const CreateRequestPage = () => {
   const handleSubmit = async () => {
     if (!validate(3) || !user) return;
     setSubmitting(true);
-    // Save UPI to localStorage for future requests
     if (formData.upiId) localStorage.setItem('aidconnect_upi', formData.upiId);
     await addRequest({
       requesterId: user.uid,
@@ -2391,12 +2367,8 @@ const CreateRequestPage = () => {
       category: formData.category,
       targetAmount: parseInt(formData.targetAmount),
       urgency: formData.urgency,
-      // Use REAL GPS coords if available, else center of India as fallback
-      location: {
-        lat: locationCoords?.lat ?? 20.5937,
-        lng: locationCoords?.lng ?? 78.9629,
-        address: formData.location,
-      },
+      // Use REAL GPS coords ‚Äî not hardcoded
+      location: { lat: locationCoords?.lat ?? 20.5937, lng: locationCoords?.lng ?? 78.9629, address: formData.location },
       proofUrls: proofImages.length > 0 ? proofImages : ['https://picsum.photos/seed/proof_default/800/600']
     });
     setSubmitting(false);
@@ -2427,7 +2399,7 @@ const CreateRequestPage = () => {
           <div className="mb-4 flex items-center gap-3 p-4 bg-green-50 border-2 border-green-400 rounded-2xl">
             <CheckCircle size={20} className="text-green-600 shrink-0" />
             <div className="flex-1 min-w-0">
-              <span className="text-sm font-black text-green-700 uppercase tracking-widest">Y"ç Location Detected</span>
+              <span className="text-sm font-black text-green-700 uppercase tracking-widest">Location Detected</span>
               <p className="text-[10px] text-green-600 font-bold mt-0.5 truncate">{formData.location}</p>
             </div>
           </div>
@@ -2435,7 +2407,7 @@ const CreateRequestPage = () => {
         {gpsStatus === 'denied' && (
           <div className="mb-4 flex items-center gap-3 p-4 bg-yellow-50 border-2 border-yellow-400 rounded-2xl">
             <AlertCircle size={20} className="text-yellow-600 shrink-0" />
-            <span className="text-sm font-black text-yellow-700">GPS denied ‚?" type your location manually below</span>
+            <span className="text-sm font-black text-yellow-700">GPS denied ‚Äî type your location manually below</span>
           </div>
         )}
 
@@ -2473,54 +2445,31 @@ const CreateRequestPage = () => {
         <CardContent className="p-8 space-y-8">
           <AnimatePresence mode="wait">
             {step === 1 ? (
-              <motion.div
-                key="step1"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="space-y-6"
-              >
+              <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
                 <div className="space-y-3">
                   <label className="text-xs font-black uppercase text-gray-400 tracking-widest flex items-center gap-2">
                     <FileText size={14} /> Request Title <span className="text-red-500">*</span>
                   </label>
-                  <Input
-                    className={`border-2 rounded-2xl font-bold h-14 text-lg focus:ring-green-500 transition-all ${errors.title ? 'border-red-500 bg-red-50' : 'border-black'}`}
-                    placeholder="e.g. Emergency Medical Support for Flood Victims"
-                    value={formData.title}
-                    onChange={e => { setFormData({ ...formData, title: e.target.value }); setErrors({}); }}
-                  />
+                  <Input className={`border-2 rounded-2xl font-bold h-14 text-lg focus:ring-green-500 transition-all ${errors.title ? 'border-red-500 bg-red-50' : 'border-black'}`} placeholder="e.g. Emergency Medical Support for Flood Victims" value={formData.title} onChange={e => { setFormData({ ...formData, title: e.target.value }); setErrors({}); }} />
                   {errors.title && <p className="text-red-500 text-xs font-bold flex items-center gap-1"><AlertCircle size={12} />{errors.title}</p>}
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-3">
-                    <label className="text-xs font-black uppercase text-gray-400 tracking-widest flex items-center gap-2">
-                      <LayoutGrid size={14} /> Category
-                    </label>
+                    <label className="text-xs font-black uppercase text-gray-400 tracking-widest flex items-center gap-2"><LayoutGrid size={14} /> Category</label>
                     <Select onValueChange={(v) => setFormData({ ...formData, category: v as any })} defaultValue={formData.category}>
-                      <SelectTrigger className="border-2 border-black rounded-2xl font-bold h-14 focus:ring-green-500">
-                        <SelectValue placeholder="Select Category" />
-                      </SelectTrigger>
+                      <SelectTrigger className="border-2 border-black rounded-2xl font-bold h-14 focus:ring-green-500"><SelectValue placeholder="Select Category" /></SelectTrigger>
                       <SelectContent className="border-2 border-black rounded-xl">
-                        <SelectItem value="Food">Food</SelectItem>
-                        <SelectItem value="Medical">Medical</SelectItem>
-                        <SelectItem value="Emergency">Emergency</SelectItem>
-                        <SelectItem value="Education">Education</SelectItem>
+                        <SelectItem value="Food">Food</SelectItem><SelectItem value="Medical">Medical</SelectItem>
+                        <SelectItem value="Emergency">Emergency</SelectItem><SelectItem value="Education">Education</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-3">
-                    <label className="text-xs font-black uppercase text-gray-400 tracking-widest flex items-center gap-2">
-                      <AlertCircle size={14} /> Urgency Level
-                    </label>
+                    <label className="text-xs font-black uppercase text-gray-400 tracking-widest flex items-center gap-2"><AlertCircle size={14} /> Urgency Level</label>
                     <Select onValueChange={(v) => setFormData({ ...formData, urgency: v as any })} defaultValue={formData.urgency}>
-                      <SelectTrigger className="border-2 border-black rounded-2xl font-bold h-14 focus:ring-green-500">
-                        <SelectValue placeholder="Select Urgency" />
-                      </SelectTrigger>
+                      <SelectTrigger className="border-2 border-black rounded-2xl font-bold h-14 focus:ring-green-500"><SelectValue placeholder="Select Urgency" /></SelectTrigger>
                       <SelectContent className="border-2 border-black rounded-xl">
-                        <SelectItem value="Low">Low</SelectItem>
-                        <SelectItem value="Medium">Medium</SelectItem>
-                        <SelectItem value="High">High</SelectItem>
+                        <SelectItem value="Low">Low</SelectItem><SelectItem value="Medium">Medium</SelectItem><SelectItem value="High">High</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -2530,134 +2479,66 @@ const CreateRequestPage = () => {
                 </Button>
               </motion.div>
             ) : step === 2 ? (
-              <motion.div
-                key="step2"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="space-y-6"
-              >
+              <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
                 <div className="space-y-3">
-                  <label className="text-xs font-black uppercase text-gray-400 tracking-widest flex items-center gap-2">
-                    <MessageSquare size={14} /> Detailed Description <span className="text-red-500">*</span>
-                  </label>
-                  <Textarea
-                    className={`border-2 rounded-2xl font-bold min-h-[160px] text-lg focus:ring-green-500 transition-all ${errors.description ? 'border-red-500 bg-red-50' : 'border-black'}`}
-                    placeholder="Provide as much detail as possible to help donors understand the situation..."
-                    value={formData.description}
-                    onChange={e => { setFormData({ ...formData, description: e.target.value }); setErrors({}); }}
-                  />
+                  <label className="text-xs font-black uppercase text-gray-400 tracking-widest flex items-center gap-2"><MessageSquare size={14} /> Detailed Description <span className="text-red-500">*</span></label>
+                  <Textarea className={`border-2 rounded-2xl font-bold min-h-[160px] text-lg focus:ring-green-500 transition-all ${errors.description ? 'border-red-500 bg-red-50' : 'border-black'}`} placeholder="Provide as much detail as possible to help donors understand the situation..." value={formData.description} onChange={e => { setFormData({ ...formData, description: e.target.value }); setErrors({}); }} />
                   {errors.description && <p className="text-red-500 text-xs font-bold flex items-center gap-1"><AlertCircle size={12} />{errors.description}</p>}
                 </div>
                 <div className="space-y-3">
-                  <label className="text-xs font-black uppercase text-gray-400 tracking-widest flex items-center gap-2">
-                    <TrendingUp size={14} /> Target Amount (‚,π) <span className="text-red-500">*</span>
-                  </label>
+                  <label className="text-xs font-black uppercase text-gray-400 tracking-widest flex items-center gap-2"><TrendingUp size={14} /> Target Amount (Rs.) <span className="text-red-500">*</span></label>
                   <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-xl text-gray-400">‚,π</span>
-                    <Input
-                      type="number"
-                      className={`border-2 rounded-2xl font-bold h-14 pl-10 text-xl focus:ring-green-500 transition-all ${errors.targetAmount ? 'border-red-500 bg-red-50' : 'border-black'}`}
-                      placeholder="0.00"
-                      value={formData.targetAmount}
-                      onChange={e => { setFormData({ ...formData, targetAmount: e.target.value }); setErrors({}); }}
-                    />
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-xl text-gray-400">Rs.</span>
+                    <Input type="number" className={`border-2 rounded-2xl font-bold h-14 pl-14 text-xl focus:ring-green-500 transition-all ${errors.targetAmount ? 'border-red-500 bg-red-50' : 'border-black'}`} placeholder="0.00" value={formData.targetAmount} onChange={e => { setFormData({ ...formData, targetAmount: e.target.value }); setErrors({}); }} />
                   </div>
                   {errors.targetAmount && <p className="text-red-500 text-xs font-bold flex items-center gap-1"><AlertCircle size={12} />{errors.targetAmount}</p>}
                 </div>
                 <div className="flex gap-4">
                   <Button onClick={() => setStep(1)} variant="outline" className="flex-1 h-16 border-2 border-black font-black uppercase rounded-2xl">Back</Button>
                   <Button onClick={() => goNext(3)} className="flex-[2] h-16 bg-black text-white font-black uppercase tracking-widest text-lg rounded-2xl shadow-[6px_6px_0px_0px_rgba(34,197,94,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all">
-                    Next: Proof & Location <ArrowRight size={20} className="ml-2" />
+                    Next: Location &amp; UPI <ArrowRight size={20} className="ml-2" />
                   </Button>
                 </div>
               </motion.div>
             ) : (
-              <motion.div
-                key="step3"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="space-y-6"
-              >
-                {/* Proof Image Upload */}
+              <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
+                {/* Proof Images */}
                 <div className="space-y-3">
-                  <label className="text-xs font-black uppercase text-gray-400 tracking-widest flex items-center gap-2">
-                    <Camera size={14} /> Upload Proof Images
-                  </label>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    className="hidden"
-                    onChange={handleFileChange}
-                  />
-                  <div
-                    onClick={() => fileInputRef.current?.click()}
-                    className="border-4 border-dashed border-black rounded-[2rem] p-8 flex flex-col items-center justify-center bg-gray-50 hover:bg-green-50 transition-colors cursor-pointer group"
-                  >
-                    <div className="w-16 h-16 bg-white border-2 border-black rounded-2xl flex items-center justify-center mb-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] group-hover:scale-110 transition-transform">
-                      <Camera size={28} className="text-black" />
-                    </div>
+                  <label className="text-xs font-black uppercase text-gray-400 tracking-widest flex items-center gap-2"><Camera size={14} /> Upload Proof Images</label>
+                  <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFileChange} />
+                  <div onClick={() => fileInputRef.current?.click()} className="border-4 border-dashed border-black rounded-[2rem] p-8 flex flex-col items-center justify-center bg-gray-50 hover:bg-green-50 transition-colors cursor-pointer group">
+                    <div className="w-16 h-16 bg-white border-2 border-black rounded-2xl flex items-center justify-center mb-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] group-hover:scale-110 transition-transform"><Camera size={28} className="text-black" /></div>
                     <p className="text-sm font-black uppercase text-black mb-1">Click to Upload Proof</p>
-                    <p className="text-[10px] font-bold text-gray-400">Medical bills, ID cards, photos ‚?" donors will see these</p>
+                    <p className="text-[10px] font-bold text-gray-400">Medical bills, ID cards, photos</p>
                   </div>
                   {proofImages.length > 0 && (
                     <div className="grid grid-cols-3 gap-3 mt-3">
                       {proofImages.map((src, i) => (
                         <div key={i} className="relative group">
                           <img src={src} className="w-full h-24 object-cover rounded-2xl border-2 border-black" />
-                          <button
-                            onClick={() => setProofImages(p => p.filter((_, idx) => idx !== i))}
-                            className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-black border border-white opacity-0 group-hover:opacity-100 transition-opacity"
-                          >‚o.</button>
+                          <button onClick={() => setProofImages(p => p.filter((_, idx) => idx !== i))} className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-black border border-white opacity-0 group-hover:opacity-100 transition-opacity">x</button>
                         </div>
                       ))}
                     </div>
                   )}
                 </div>
 
-                {/* Location ‚?" GPS */}
+                {/* Location */}
                 <div className="space-y-3">
-                  <label className="text-xs font-black uppercase text-gray-400 tracking-widest flex items-center gap-2">
-                    <MapPin size={14} /> Location <span className="text-red-500">*</span>
-                  </label>
-                  {/* Map tile preview if coords available */}
+                  <label className="text-xs font-black uppercase text-gray-400 tracking-widest flex items-center gap-2"><MapPin size={14} /> Location <span className="text-red-500">*</span></label>
                   {locationCoords && (
                     <div className="rounded-2xl overflow-hidden border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                      <img
-                        src={`https://staticmap.openstreetmap.de/staticmap.php?center=${locationCoords.lat},${locationCoords.lng}&zoom=15&size=600x160&markers=${locationCoords.lat},${locationCoords.lng},red`}
-                        alt="Location preview"
-                        className="w-full h-36 object-cover"
-                        onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                      />
+                      <img src={`https://staticmap.openstreetmap.de/staticmap.php?center=${locationCoords.lat},${locationCoords.lng}&zoom=15&size=600x160&markers=${locationCoords.lat},${locationCoords.lng},red`} alt="Location preview" className="w-full h-36 object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                       <div className="p-3 bg-green-50 flex items-center gap-2">
                         <CheckCircle size={14} className="text-green-600 shrink-0" />
-                        <span className="text-[10px] font-black text-green-700 uppercase tracking-widest">
-                          Y"ç {locationCoords.lat.toFixed(5)}, {locationCoords.lng.toFixed(5)} ‚?" Pin will appear at this spot on the map
-                        </span>
+                        <span className="text-[10px] font-black text-green-700 uppercase tracking-widest">Pin at {locationCoords.lat.toFixed(4)}, {locationCoords.lng.toFixed(4)}</span>
                       </div>
                     </div>
                   )}
                   <div className="flex gap-3">
-                    <Input
-                      className={`border-2 rounded-2xl font-bold h-14 flex-1 focus:ring-green-500 ${errors.location ? 'border-red-500 bg-red-50' : 'border-black'}`}
-                      placeholder="e.g. Chennai, Tamil Nadu or tap GPS ‚?'"
-                      value={formData.location}
-                      onChange={e => { setFormData({ ...formData, location: e.target.value }); setErrors({}); }}
-                    />
-                    <Button
-                      variant="outline"
-                      onClick={handleGps}
-                      disabled={gpsLoading}
-                      className={`w-14 h-14 p-0 border-2 rounded-2xl transition-colors ${gpsStatus === 'success' ? 'border-green-500 bg-green-50' : 'border-black hover:bg-green-500'}`}
-                      title="Use my GPS location"
-                    >
-                      {gpsLoading
-                        ? <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }}><Navigation size={24} /></motion.div>
-                        : <Navigation size={24} className={gpsStatus === 'success' ? 'text-green-600' : ''} />
-                      }
+                    <Input className={`border-2 rounded-2xl font-bold h-14 flex-1 focus:ring-green-500 ${errors.location ? 'border-red-500 bg-red-50' : 'border-black'}`} placeholder="e.g. Chennai, Tamil Nadu or tap GPS" value={formData.location} onChange={e => { setFormData({ ...formData, location: e.target.value }); setErrors({}); }} />
+                    <Button variant="outline" onClick={handleGps} disabled={gpsLoading} className={`w-14 h-14 p-0 border-2 rounded-2xl transition-colors ${gpsStatus === 'success' ? 'border-green-500 bg-green-50' : 'border-black hover:bg-green-500'}`} title="Use GPS">
+                      {gpsLoading ? <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }}><Navigation size={24} /></motion.div> : <Navigation size={24} className={gpsStatus === 'success' ? 'text-green-600' : ''} />}
                     </Button>
                   </div>
                   {errors.location && <p className="text-red-500 text-xs font-bold flex items-center gap-1"><AlertCircle size={12} />{errors.location}</p>}
@@ -2666,33 +2547,18 @@ const CreateRequestPage = () => {
                 {/* UPI ID */}
                 <div className="space-y-3">
                   <label className="text-xs font-black uppercase text-gray-400 tracking-widest flex items-center gap-2">
-                    <Wallet size={14} /> Your UPI ID <span className="text-gray-400 text-[9px] font-bold normal-case tracking-normal">(so donors can pay you directly)</span>
+                    <Wallet size={14} /> Your UPI ID <span className="text-gray-400 text-[9px] font-bold normal-case tracking-normal">(donors pay you directly)</span>
                   </label>
                   <div className="relative">
-                    <Input
-                      className="border-2 border-black rounded-2xl font-bold h-14 pr-24 focus:ring-green-500"
-                      placeholder="yourname@okicici / @paytm / @upi"
-                      value={formData.upiId}
-                      onChange={e => { setFormData({ ...formData, upiId: e.target.value }); }}
-                    />
-                    {formData.upiId && (
-                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[9px] font-black uppercase text-green-600 bg-green-100 px-2 py-1 rounded-lg">
-                        ‚o" Saved
-                      </span>
-                    )}
+                    <Input className="border-2 border-black rounded-2xl font-bold h-14 pr-24 focus:ring-green-500" placeholder="yourname@okicici / @paytm / @upi" value={formData.upiId} onChange={e => setFormData({ ...formData, upiId: e.target.value })} />
+                    {formData.upiId && <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[9px] font-black uppercase text-green-600 bg-green-100 px-2 py-1 rounded-lg">Saved</span>}
                   </div>
-                  <p className="text-[10px] text-gray-400 font-bold">
-                    Y'° Donors will use this UPI ID to send money directly to you. Leave blank to use platform default.
-                  </p>
+                  <p className="text-[10px] text-gray-400 font-bold">Donors use this UPI ID to send money directly to you.</p>
                 </div>
 
                 <div className="flex gap-4">
                   <Button onClick={() => setStep(2)} variant="outline" className="flex-1 h-16 border-2 border-black font-black uppercase rounded-2xl">Back</Button>
-                  <Button
-                    onClick={handleSubmit}
-                    disabled={submitting}
-                    className="flex-[2] h-16 bg-green-500 text-black border-2 border-black font-black uppercase tracking-widest text-lg rounded-2xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all"
-                  >
+                  <Button onClick={handleSubmit} disabled={submitting} className="flex-[2] h-16 bg-green-500 text-black border-2 border-black font-black uppercase tracking-widest text-lg rounded-2xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all">
                     {submitting ? 'Publishing...' : 'Publish Request'} <Zap size={20} className="ml-2" />
                   </Button>
                 </div>
@@ -2704,7 +2570,6 @@ const CreateRequestPage = () => {
     </div>
   );
 };
-
 const VerificationPage = () => {
   const { id } = useParams();
   const { requests, addVerification } = useData();
@@ -2867,7 +2732,7 @@ const MapPage = () => {
                 <div className="space-y-1">
                   <div className="flex justify-between text-[9px] font-black uppercase">
                     <span>Raised</span>
-                    <span>‚,π{req.raisedAmount.toLocaleString()} / ‚,π{req.targetAmount.toLocaleString()}</span>
+                    <span>‚Çπ{req.raisedAmount.toLocaleString()} / ‚Çπ{req.targetAmount.toLocaleString()}</span>
                   </div>
                   <div className="h-2 bg-gray-100 rounded-full overflow-hidden border border-gray-300">
                     <div className="h-full bg-yellow-400 transition-all" style={{ width: `${Math.min((req.raisedAmount / req.targetAmount) * 100, 100)}%` }} />
@@ -2877,7 +2742,7 @@ const MapPage = () => {
                   onClick={() => navigate(`/request/${req.id}`)}
                   className="w-full mt-1 py-1.5 bg-black text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-gray-800 transition-colors"
                 >
-                  View Request ‚?'
+                  View Request ‚Üí
                 </button>
               </div>
             </Popup>
@@ -2899,7 +2764,7 @@ const MapPage = () => {
                 onChange={e => setMapSearch(e.target.value)}
               />
               {mapSearch && (
-                <button onClick={() => setMapSearch('')} className="text-gray-400 hover:text-black transition-colors">‚o.</button>
+                <button onClick={() => setMapSearch('')} className="text-gray-400 hover:text-black transition-colors">‚úï</button>
               )}
             </div>
             <button
@@ -2907,7 +2772,7 @@ const MapPage = () => {
               className="w-14 h-14 bg-white text-black border-4 border-black rounded-2xl flex items-center justify-center shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:bg-gray-50 transition-colors"
               title="Back to feed"
             >
-              ‚?ê
+              ‚Üê
             </button>
           </div>
 
@@ -2939,7 +2804,7 @@ const MapPage = () => {
         <div className="w-full max-w-4xl overflow-x-auto flex gap-4 no-scrollbar pb-4">
           {filtered.length === 0 ? (
             <div className="min-w-[280px] bg-white border-4 border-black rounded-[2rem] p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center gap-2">
-              <span className="text-4xl">Y-∫Ô∏è</span>
+              <span className="text-4xl">üó∫Ô∏è</span>
               <span className="font-black uppercase text-sm">No results found</span>
             </div>
           ) : filtered.map(req => (
@@ -2967,7 +2832,7 @@ const MapPage = () => {
                 </div>
                 <div className="space-y-1 mt-1">
                   <div className="flex justify-between text-[8px] font-black uppercase">
-                    <span>‚,π{req.raisedAmount.toLocaleString()}</span>
+                    <span>‚Çπ{req.raisedAmount.toLocaleString()}</span>
                     <span>{Math.round(Math.min((req.raisedAmount / req.targetAmount) * 100, 100))}%</span>
                   </div>
                   <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden border border-black">
@@ -3048,7 +2913,7 @@ const AdminPage = () => {
             placeholder="Filter requests..."
             className="bg-transparent outline-none font-bold text-sm w-32 placeholder:text-gray-300"
           />
-          {adminSearch && <button onClick={() => setAdminSearch('')} className="text-gray-400 hover:text-black text-xs font-black">‚o.</button>}
+          {adminSearch && <button onClick={() => setAdminSearch('')} className="text-gray-400 hover:text-black text-xs font-black">‚úï</button>}
         </div>
       </div>
       <div className="space-y-4 mb-10">
@@ -3105,7 +2970,7 @@ const AdminPage = () => {
       {/* Flagged Only Section */}
       {flaggedRequests.length > 0 && (
         <>
-          <h2 className="text-2xl font-black italic uppercase tracking-tighter mb-4 text-red-600">Ys© Flagged Requests</h2>
+          <h2 className="text-2xl font-black italic uppercase tracking-tighter mb-4 text-red-600">üö© Flagged Requests</h2>
           <div className="space-y-4">
             {flaggedRequests.map(req => (
               <div key={req.id + '_flagged'} className="p-5 bg-red-50 border-4 border-red-400 rounded-[1.5rem] flex items-start justify-between gap-3">
@@ -3179,7 +3044,7 @@ const ProfilePage = () => {
       {/* Stats Dashboard */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
         {[
-          { label: 'Total Donated', value: `‚,π${totalDonated.toLocaleString()}`, bg: 'bg-black text-white', shadow: 'shadow-[4px_4px_0px_0px_rgba(253,224,71,1)]', icon: <Wallet size={18} className="text-yellow-400" /> },
+          { label: 'Total Donated', value: `‚Çπ${totalDonated.toLocaleString()}`, bg: 'bg-black text-white', shadow: 'shadow-[4px_4px_0px_0px_rgba(253,224,71,1)]', icon: <Wallet size={18} className="text-yellow-400" /> },
           { label: 'Fulfillments', value: myFulfillments.length, bg: 'bg-green-500 text-black border-2 border-black', shadow: 'shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]', icon: <Gift size={18} className="text-black" /> },
           { label: 'My Requests', value: myRequests.length, bg: 'bg-yellow-400 text-black border-2 border-black', shadow: 'shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]', icon: <FileText size={18} className="text-black" /> },
           { label: 'Validations', value: myValidations, bg: 'bg-white text-black border-4 border-black', shadow: 'shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]', icon: <ThumbsUp size={18} className="text-blue-600" /> },
@@ -3225,7 +3090,7 @@ const ProfilePage = () => {
                     <div className="text-[10px] font-bold text-gray-400">{new Date(don.timestamp).toLocaleDateString()}</div>
                   </div>
                 </div>
-                <div className="font-black italic text-green-600">+‚,π{don.amount}</div>
+                <div className="font-black italic text-green-600">+‚Çπ{don.amount}</div>
               </div>
             ))}
           </div>
@@ -3239,7 +3104,7 @@ const ProfilePage = () => {
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 bg-blue-100 rounded-xl border-2 border-black flex items-center justify-center"><Gift size={16} className="text-blue-600" /></div>
                   <div>
-                    <div className="font-black text-sm uppercase">{ful.quantity}√- {ful.itemName}</div>
+                    <div className="font-black text-sm uppercase">{ful.quantity}√ó {ful.itemName}</div>
                     <div className="text-[10px] font-bold text-gray-400">{new Date(ful.timestamp).toLocaleDateString()}</div>
                   </div>
                 </div>
@@ -3261,7 +3126,7 @@ const ProfilePage = () => {
                     <div className="text-[10px] font-bold text-gray-400 uppercase">{req.status}</div>
                   </div>
                 </div>
-                <div className="font-black italic">‚,π{req.raisedAmount}</div>
+                <div className="font-black italic">‚Çπ{req.raisedAmount}</div>
               </div>
             ))}
           </div>
@@ -3310,7 +3175,7 @@ const AppContent = () => {
 
   if (showSplash) return <SplashScreen onFinish={() => setShowSplash(false)} />;
 
-  // Show a branded loading screen while verifying session ‚?" never show AuthPage during this
+  // Show a branded loading screen while verifying session ‚Äî never show AuthPage during this
   if (loading) return (
     <div className="fixed inset-0 bg-[#0a0a0a] flex flex-col items-center justify-center gap-6">
       <div className="w-16 h-16 bg-green-500 rounded-[1.5rem] flex items-center justify-center border-4 border-white shadow-[0_0_40px_rgba(34,197,94,0.4)]">
