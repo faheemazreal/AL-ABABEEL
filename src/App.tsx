@@ -1289,7 +1289,7 @@ const HomePage = () => {
         <div className="flex justify-between items-end">
           <div>
             <h3 className="text-4xl font-black italic tracking-tighter uppercase leading-none">Active Causes</h3>
-            <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest mt-2">{filteredRequests.length} requests in your area</p>
+            <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest mt-2">{filteredRequests.length} requests worldwide</p>
           </div>
           <motion.button
             whileHover={{ x: 5 }}
@@ -1424,11 +1424,10 @@ const RequestDetailPage = () => {
       <UPIDonationModal
         isOpen={showUPI}
         onClose={() => setShowUPI(false)}
-        upiId={request.requesterUpiId || localStorage.getItem('aidconnect_upi') || 'charity@okaxis'}
+        upiId={localStorage.getItem('aidconnect_upi') || (request.requesterId ? `${request.requesterId.substring(0, 8)}@okaxis` : 'charity@okaxis')}
         title={request.title}
         amount={parseInt(donationAmount) || 100}
       />
-
 
       <AnimatePresence>
         {showSuccess && (
@@ -2262,69 +2261,16 @@ const CreateRequestPage = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [proofImages, setProofImages] = useState<string[]>([]);
   const [gpsLoading, setGpsLoading] = useState(false);
-  const [gpsStatus, setGpsStatus] = useState<'idle' | 'loading' | 'success' | 'denied'>('idle');
   const [submitting, setSubmitting] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-  // Real GPS coords — this is what gets saved to Appwrite
-  const [locationCoords, setLocationCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     category: 'Food' as RequestCategory,
     targetAmount: '',
     urgency: 'Medium' as Urgency,
-    location: '',
-    upiId: localStorage.getItem('aidconnect_upi') || '',
+    location: ''
   });
-
-  const reverseGeocode = async (lat: number, lng: number) => {
-    try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
-        { headers: { 'Accept-Language': 'en' } }
-      );
-      const data = await res.json();
-      return data.display_name
-        ? data.display_name.split(',').slice(0, 3).join(', ')
-        : `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-    } catch {
-      return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-    }
-  };
-
-  // Auto-trigger GPS on page load
-  useEffect(() => {
-    if (!navigator.geolocation) return;
-    setGpsStatus('loading');
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const { latitude, longitude } = pos.coords;
-        setLocationCoords({ lat: latitude, lng: longitude });
-        setGpsStatus('success');
-        const address = await reverseGeocode(latitude, longitude);
-        setFormData(f => ({ ...f, location: address }));
-      },
-      () => setGpsStatus('denied'),
-      { timeout: 10000, maximumAge: 60000 }
-    );
-  }, []);
-
-  const handleGps = () => {
-    if (!navigator.geolocation) { setGpsStatus('denied'); return; }
-    setGpsStatus('loading'); setGpsLoading(true);
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const { latitude, longitude } = pos.coords;
-        setLocationCoords({ lat: latitude, lng: longitude });
-        setGpsStatus('success');
-        const address = await reverseGeocode(latitude, longitude);
-        setFormData(f => ({ ...f, location: address }));
-        setGpsLoading(false);
-      },
-      () => { setGpsStatus('denied'); setGpsLoading(false); },
-      { timeout: 10000 }
-    );
-  };
 
   const validate = (s: number) => {
     const errs: Record<string, string> = {};
@@ -2334,7 +2280,7 @@ const CreateRequestPage = () => {
     }
     if (s === 2) {
       if (!formData.description.trim()) errs.description = 'Description is required.';
-      if (!formData.targetAmount || parseInt(formData.targetAmount) < 100) errs.targetAmount = 'Enter a valid target amount (min \u20B9100).';
+      if (!formData.targetAmount || parseInt(formData.targetAmount) < 100) errs.targetAmount = 'Enter a valid target amount (min ₹100).';
     }
     if (s === 3) {
       if (!formData.location.trim()) errs.location = 'Location is required.';
@@ -2343,13 +2289,32 @@ const CreateRequestPage = () => {
     return Object.keys(errs).length === 0;
   };
 
-  const goNext = (nextStep: number) => { if (validate(step)) setStep(nextStep); };
+  const goNext = (nextStep: number) => {
+    if (validate(step)) setStep(nextStep);
+  };
+
+  const handleGps = () => {
+    setGpsLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        setFormData(f => ({ ...f, location: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}` }));
+        setGpsLoading(false);
+      },
+      () => {
+        setFormData(f => ({ ...f, location: 'Chennai, Tamil Nadu' }));
+        setGpsLoading(false);
+      }
+    );
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []) as File[];
     files.forEach(file => {
       const reader = new FileReader();
-      reader.onload = (ev) => setProofImages(prev => [...prev, ev.target?.result as string]);
+      reader.onload = (ev) => {
+        setProofImages(prev => [...prev, ev.target?.result as string]);
+      };
       reader.readAsDataURL(file);
     });
   };
@@ -2357,18 +2322,15 @@ const CreateRequestPage = () => {
   const handleSubmit = async () => {
     if (!validate(3) || !user) return;
     setSubmitting(true);
-    if (formData.upiId) localStorage.setItem('aidconnect_upi', formData.upiId);
     await addRequest({
       requesterId: user.uid,
       requesterName: user.displayName,
-      requesterUpiId: formData.upiId || '',
       title: formData.title,
       description: formData.description,
       category: formData.category,
       targetAmount: parseInt(formData.targetAmount),
       urgency: formData.urgency,
-      // Use REAL GPS coords — not hardcoded
-      location: { lat: locationCoords?.lat ?? 20.5937, lng: locationCoords?.lng ?? 78.9629, address: formData.location },
+      location: { lat: 12.9716, lng: 77.5946, address: formData.location },
       proofUrls: proofImages.length > 0 ? proofImages : ['https://picsum.photos/seed/proof_default/800/600']
     });
     setSubmitting(false);
@@ -2378,38 +2340,13 @@ const CreateRequestPage = () => {
   const steps = [
     { id: 1, title: 'Basics', icon: <FileText size={18} /> },
     { id: 2, title: 'Details', icon: <TrendingUp size={18} /> },
-    { id: 3, title: 'Proof & Location', icon: <MapPin size={18} /> }
+    { id: 3, title: 'Proof', icon: <Camera size={18} /> }
   ];
 
   return (
     <div className="max-w-2xl mx-auto py-12 px-6 pb-32">
       <div className="mb-12">
         <h2 className="text-5xl font-black italic tracking-tighter uppercase mb-8">Create Request</h2>
-
-        {/* GPS Status Banner */}
-        {gpsStatus === 'loading' && (
-          <div className="mb-4 flex items-center gap-3 p-4 bg-blue-50 border-2 border-blue-300 rounded-2xl">
-            <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }}>
-              <Navigation size={20} className="text-blue-500" />
-            </motion.div>
-            <span className="text-sm font-black text-blue-700 uppercase tracking-widest">Detecting your location...</span>
-          </div>
-        )}
-        {gpsStatus === 'success' && locationCoords && (
-          <div className="mb-4 flex items-center gap-3 p-4 bg-green-50 border-2 border-green-400 rounded-2xl">
-            <CheckCircle size={20} className="text-green-600 shrink-0" />
-            <div className="flex-1 min-w-0">
-              <span className="text-sm font-black text-green-700 uppercase tracking-widest">Location Detected</span>
-              <p className="text-[10px] text-green-600 font-bold mt-0.5 truncate">{formData.location}</p>
-            </div>
-          </div>
-        )}
-        {gpsStatus === 'denied' && (
-          <div className="mb-4 flex items-center gap-3 p-4 bg-yellow-50 border-2 border-yellow-400 rounded-2xl">
-            <AlertCircle size={20} className="text-yellow-600 shrink-0" />
-            <span className="text-sm font-black text-yellow-700">GPS denied — type your location manually below</span>
-          </div>
-        )}
 
         {/* Progress Indicator */}
         <div className="flex items-center justify-between relative px-2">
@@ -2433,7 +2370,7 @@ const CreateRequestPage = () => {
                   {step > s.id ? <Check size={20} /> : s.icon}
                 </div>
               </motion.div>
-              <span className={`text-[10px] font-black uppercase tracking-widest text-center ${step >= s.id ? 'text-black' : 'text-gray-400'}`}>
+              <span className={`text-[10px] font-black uppercase tracking-widest ${step >= s.id ? 'text-black' : 'text-gray-400'}`}>
                 {s.title}
               </span>
             </div>
@@ -2445,31 +2382,54 @@ const CreateRequestPage = () => {
         <CardContent className="p-8 space-y-8">
           <AnimatePresence mode="wait">
             {step === 1 ? (
-              <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
+              <motion.div
+                key="step1"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-6"
+              >
                 <div className="space-y-3">
                   <label className="text-xs font-black uppercase text-gray-400 tracking-widest flex items-center gap-2">
                     <FileText size={14} /> Request Title <span className="text-red-500">*</span>
                   </label>
-                  <Input className={`border-2 rounded-2xl font-bold h-14 text-lg focus:ring-green-500 transition-all ${errors.title ? 'border-red-500 bg-red-50' : 'border-black'}`} placeholder="e.g. Emergency Medical Support for Flood Victims" value={formData.title} onChange={e => { setFormData({ ...formData, title: e.target.value }); setErrors({}); }} />
+                  <Input
+                    className={`border-2 rounded-2xl font-bold h-14 text-lg focus:ring-green-500 transition-all ${errors.title ? 'border-red-500 bg-red-50' : 'border-black'}`}
+                    placeholder="e.g. Emergency Medical Support for Flood Victims"
+                    value={formData.title}
+                    onChange={e => { setFormData({ ...formData, title: e.target.value }); setErrors({}); }}
+                  />
                   {errors.title && <p className="text-red-500 text-xs font-bold flex items-center gap-1"><AlertCircle size={12} />{errors.title}</p>}
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-3">
-                    <label className="text-xs font-black uppercase text-gray-400 tracking-widest flex items-center gap-2"><LayoutGrid size={14} /> Category</label>
+                    <label className="text-xs font-black uppercase text-gray-400 tracking-widest flex items-center gap-2">
+                      <LayoutGrid size={14} /> Category
+                    </label>
                     <Select onValueChange={(v) => setFormData({ ...formData, category: v as any })} defaultValue={formData.category}>
-                      <SelectTrigger className="border-2 border-black rounded-2xl font-bold h-14 focus:ring-green-500"><SelectValue placeholder="Select Category" /></SelectTrigger>
+                      <SelectTrigger className="border-2 border-black rounded-2xl font-bold h-14 focus:ring-green-500">
+                        <SelectValue placeholder="Select Category" />
+                      </SelectTrigger>
                       <SelectContent className="border-2 border-black rounded-xl">
-                        <SelectItem value="Food">Food</SelectItem><SelectItem value="Medical">Medical</SelectItem>
-                        <SelectItem value="Emergency">Emergency</SelectItem><SelectItem value="Education">Education</SelectItem>
+                        <SelectItem value="Food">Food</SelectItem>
+                        <SelectItem value="Medical">Medical</SelectItem>
+                        <SelectItem value="Emergency">Emergency</SelectItem>
+                        <SelectItem value="Education">Education</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-3">
-                    <label className="text-xs font-black uppercase text-gray-400 tracking-widest flex items-center gap-2"><AlertCircle size={14} /> Urgency Level</label>
+                    <label className="text-xs font-black uppercase text-gray-400 tracking-widest flex items-center gap-2">
+                      <AlertCircle size={14} /> Urgency Level
+                    </label>
                     <Select onValueChange={(v) => setFormData({ ...formData, urgency: v as any })} defaultValue={formData.urgency}>
-                      <SelectTrigger className="border-2 border-black rounded-2xl font-bold h-14 focus:ring-green-500"><SelectValue placeholder="Select Urgency" /></SelectTrigger>
+                      <SelectTrigger className="border-2 border-black rounded-2xl font-bold h-14 focus:ring-green-500">
+                        <SelectValue placeholder="Select Urgency" />
+                      </SelectTrigger>
                       <SelectContent className="border-2 border-black rounded-xl">
-                        <SelectItem value="Low">Low</SelectItem><SelectItem value="Medium">Medium</SelectItem><SelectItem value="High">High</SelectItem>
+                        <SelectItem value="Low">Low</SelectItem>
+                        <SelectItem value="Medium">Medium</SelectItem>
+                        <SelectItem value="High">High</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -2479,86 +2439,129 @@ const CreateRequestPage = () => {
                 </Button>
               </motion.div>
             ) : step === 2 ? (
-              <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
+              <motion.div
+                key="step2"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-6"
+              >
                 <div className="space-y-3">
-                  <label className="text-xs font-black uppercase text-gray-400 tracking-widest flex items-center gap-2"><MessageSquare size={14} /> Detailed Description <span className="text-red-500">*</span></label>
-                  <Textarea className={`border-2 rounded-2xl font-bold min-h-[160px] text-lg focus:ring-green-500 transition-all ${errors.description ? 'border-red-500 bg-red-50' : 'border-black'}`} placeholder="Provide as much detail as possible to help donors understand the situation..." value={formData.description} onChange={e => { setFormData({ ...formData, description: e.target.value }); setErrors({}); }} />
+                  <label className="text-xs font-black uppercase text-gray-400 tracking-widest flex items-center gap-2">
+                    <MessageSquare size={14} /> Detailed Description <span className="text-red-500">*</span>
+                  </label>
+                  <Textarea
+                    className={`border-2 rounded-2xl font-bold min-h-[160px] text-lg focus:ring-green-500 transition-all ${errors.description ? 'border-red-500 bg-red-50' : 'border-black'}`}
+                    placeholder="Provide as much detail as possible to help donors understand the situation..."
+                    value={formData.description}
+                    onChange={e => { setFormData({ ...formData, description: e.target.value }); setErrors({}); }}
+                  />
                   {errors.description && <p className="text-red-500 text-xs font-bold flex items-center gap-1"><AlertCircle size={12} />{errors.description}</p>}
                 </div>
                 <div className="space-y-3">
-                  <label className="text-xs font-black uppercase text-gray-400 tracking-widest flex items-center gap-2"><TrendingUp size={14} /> Target Amount (Rs.) <span className="text-red-500">*</span></label>
+                  <label className="text-xs font-black uppercase text-gray-400 tracking-widest flex items-center gap-2">
+                    <TrendingUp size={14} /> Target Amount (₹) <span className="text-red-500">*</span>
+                  </label>
                   <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-xl text-gray-400">Rs.</span>
-                    <Input type="number" className={`border-2 rounded-2xl font-bold h-14 pl-14 text-xl focus:ring-green-500 transition-all ${errors.targetAmount ? 'border-red-500 bg-red-50' : 'border-black'}`} placeholder="0.00" value={formData.targetAmount} onChange={e => { setFormData({ ...formData, targetAmount: e.target.value }); setErrors({}); }} />
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-xl text-gray-400">₹</span>
+                    <Input
+                      type="number"
+                      className={`border-2 rounded-2xl font-bold h-14 pl-10 text-xl focus:ring-green-500 transition-all ${errors.targetAmount ? 'border-red-500 bg-red-50' : 'border-black'}`}
+                      placeholder="0.00"
+                      value={formData.targetAmount}
+                      onChange={e => { setFormData({ ...formData, targetAmount: e.target.value }); setErrors({}); }}
+                    />
                   </div>
                   {errors.targetAmount && <p className="text-red-500 text-xs font-bold flex items-center gap-1"><AlertCircle size={12} />{errors.targetAmount}</p>}
                 </div>
                 <div className="flex gap-4">
                   <Button onClick={() => setStep(1)} variant="outline" className="flex-1 h-16 border-2 border-black font-black uppercase rounded-2xl">Back</Button>
                   <Button onClick={() => goNext(3)} className="flex-[2] h-16 bg-black text-white font-black uppercase tracking-widest text-lg rounded-2xl shadow-[6px_6px_0px_0px_rgba(34,197,94,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all">
-                    Next: Location &amp; UPI <ArrowRight size={20} className="ml-2" />
+                    Next: Proof <ArrowRight size={20} className="ml-2" />
                   </Button>
                 </div>
               </motion.div>
             ) : (
-              <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
-                {/* Proof Images */}
+              <motion.div
+                key="step3"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-6"
+              >
+                {/* Proof Image Upload */}
                 <div className="space-y-3">
-                  <label className="text-xs font-black uppercase text-gray-400 tracking-widest flex items-center gap-2"><Camera size={14} /> Upload Proof Images</label>
-                  <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFileChange} />
-                  <div onClick={() => fileInputRef.current?.click()} className="border-4 border-dashed border-black rounded-[2rem] p-8 flex flex-col items-center justify-center bg-gray-50 hover:bg-green-50 transition-colors cursor-pointer group">
-                    <div className="w-16 h-16 bg-white border-2 border-black rounded-2xl flex items-center justify-center mb-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] group-hover:scale-110 transition-transform"><Camera size={28} className="text-black" /></div>
+                  <label className="text-xs font-black uppercase text-gray-400 tracking-widest flex items-center gap-2">
+                    <Camera size={14} /> Upload Proof Images <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={handleFileChange}
+                  />
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="border-4 border-dashed border-black rounded-[2rem] p-8 flex flex-col items-center justify-center bg-gray-50 hover:bg-green-50 transition-colors cursor-pointer group"
+                  >
+                    <div className="w-16 h-16 bg-white border-2 border-black rounded-2xl flex items-center justify-center mb-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] group-hover:scale-110 transition-transform">
+                      <Camera size={28} className="text-black" />
+                    </div>
                     <p className="text-sm font-black uppercase text-black mb-1">Click to Upload Proof</p>
-                    <p className="text-[10px] font-bold text-gray-400">Medical bills, ID cards, photos</p>
+                    <p className="text-[10px] font-bold text-gray-400">Medical bills, ID cards, photos — donors will see these</p>
                   </div>
+
+                  {/* Image Previews */}
                   {proofImages.length > 0 && (
                     <div className="grid grid-cols-3 gap-3 mt-3">
                       {proofImages.map((src, i) => (
                         <div key={i} className="relative group">
                           <img src={src} className="w-full h-24 object-cover rounded-2xl border-2 border-black" />
-                          <button onClick={() => setProofImages(p => p.filter((_, idx) => idx !== i))} className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-black border border-white opacity-0 group-hover:opacity-100 transition-opacity">x</button>
+                          <button
+                            onClick={() => setProofImages(p => p.filter((_, idx) => idx !== i))}
+                            className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-black border border-white opacity-0 group-hover:opacity-100 transition-opacity"
+                          >✕</button>
                         </div>
                       ))}
                     </div>
                   )}
+                  {errors.location && !formData.location && <p className="text-yellow-600 text-xs font-bold">⚠ Add at least one image to help donors verify</p>}
                 </div>
 
                 {/* Location */}
                 <div className="space-y-3">
-                  <label className="text-xs font-black uppercase text-gray-400 tracking-widest flex items-center gap-2"><MapPin size={14} /> Location <span className="text-red-500">*</span></label>
-                  {locationCoords && (
-                    <div className="rounded-2xl overflow-hidden border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                      <img src={`https://staticmap.openstreetmap.de/staticmap.php?center=${locationCoords.lat},${locationCoords.lng}&zoom=15&size=600x160&markers=${locationCoords.lat},${locationCoords.lng},red`} alt="Location preview" className="w-full h-36 object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                      <div className="p-3 bg-green-50 flex items-center gap-2">
-                        <CheckCircle size={14} className="text-green-600 shrink-0" />
-                        <span className="text-[10px] font-black text-green-700 uppercase tracking-widest">Pin at {locationCoords.lat.toFixed(4)}, {locationCoords.lng.toFixed(4)}</span>
-                      </div>
-                    </div>
-                  )}
+                  <label className="text-xs font-black uppercase text-gray-400 tracking-widest flex items-center gap-2">
+                    <MapPin size={14} /> Location <span className="text-red-500">*</span>
+                  </label>
                   <div className="flex gap-3">
-                    <Input className={`border-2 rounded-2xl font-bold h-14 flex-1 focus:ring-green-500 ${errors.location ? 'border-red-500 bg-red-50' : 'border-black'}`} placeholder="e.g. Chennai, Tamil Nadu or tap GPS" value={formData.location} onChange={e => { setFormData({ ...formData, location: e.target.value }); setErrors({}); }} />
-                    <Button variant="outline" onClick={handleGps} disabled={gpsLoading} className={`w-14 h-14 p-0 border-2 rounded-2xl transition-colors ${gpsStatus === 'success' ? 'border-green-500 bg-green-50' : 'border-black hover:bg-green-500'}`} title="Use GPS">
-                      {gpsLoading ? <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }}><Navigation size={24} /></motion.div> : <Navigation size={24} className={gpsStatus === 'success' ? 'text-green-600' : ''} />}
+                    <Input
+                      className={`border-2 rounded-2xl font-bold h-14 flex-1 focus:ring-green-500 ${errors.location ? 'border-red-500 bg-red-50' : 'border-black'}`}
+                      placeholder="e.g. Chennai, Tamil Nadu"
+                      value={formData.location}
+                      onChange={e => { setFormData({ ...formData, location: e.target.value }); setErrors({}); }}
+                    />
+                    <Button
+                      variant="outline"
+                      onClick={handleGps}
+                      disabled={gpsLoading}
+                      className="w-14 h-14 p-0 border-2 border-black rounded-2xl hover:bg-green-500 transition-colors"
+                      title="Use my GPS location"
+                    >
+                      {gpsLoading ? <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }}><Navigation size={24} /></motion.div> : <Navigation size={24} />}
                     </Button>
                   </div>
                   {errors.location && <p className="text-red-500 text-xs font-bold flex items-center gap-1"><AlertCircle size={12} />{errors.location}</p>}
                 </div>
 
-                {/* UPI ID */}
-                <div className="space-y-3">
-                  <label className="text-xs font-black uppercase text-gray-400 tracking-widest flex items-center gap-2">
-                    <Wallet size={14} /> Your UPI ID <span className="text-gray-400 text-[9px] font-bold normal-case tracking-normal">(donors pay you directly)</span>
-                  </label>
-                  <div className="relative">
-                    <Input className="border-2 border-black rounded-2xl font-bold h-14 pr-24 focus:ring-green-500" placeholder="yourname@okicici / @paytm / @upi" value={formData.upiId} onChange={e => setFormData({ ...formData, upiId: e.target.value })} />
-                    {formData.upiId && <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[9px] font-black uppercase text-green-600 bg-green-100 px-2 py-1 rounded-lg">Saved</span>}
-                  </div>
-                  <p className="text-[10px] text-gray-400 font-bold">Donors use this UPI ID to send money directly to you.</p>
-                </div>
-
                 <div className="flex gap-4">
                   <Button onClick={() => setStep(2)} variant="outline" className="flex-1 h-16 border-2 border-black font-black uppercase rounded-2xl">Back</Button>
-                  <Button onClick={handleSubmit} disabled={submitting} className="flex-[2] h-16 bg-green-500 text-black border-2 border-black font-black uppercase tracking-widest text-lg rounded-2xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all">
+                  <Button
+                    onClick={handleSubmit}
+                    disabled={submitting}
+                    className="flex-[2] h-16 bg-green-500 text-black border-2 border-black font-black uppercase tracking-widest text-lg rounded-2xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all"
+                  >
                     {submitting ? 'Publishing...' : 'Publish Request'} <Zap size={20} className="ml-2" />
                   </Button>
                 </div>
@@ -2570,6 +2573,7 @@ const CreateRequestPage = () => {
     </div>
   );
 };
+
 const VerificationPage = () => {
   const { id } = useParams();
   const { requests, addVerification } = useData();

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { CharityRequest, Donation, Verification, Review, Fulfillment } from '../types';
-import { databases, storage, ID, Query } from '../lib/appwrite';
+import { databases, storage, ID } from '../lib/appwrite';
 
 const DB_ID = 'main_db';
 const REQ_COL_ID = 'requests_col';
@@ -55,7 +55,6 @@ const mapDoc = (doc: any): CharityRequest => ({
     proofUrls: Array.isArray(doc.proofUrls) ? doc.proofUrls : (() => { try { return JSON.parse(doc.proofUrls || '[]'); } catch { return []; } })(),
     neededItems: (() => { try { return Array.isArray(doc.neededItems) ? doc.neededItems : JSON.parse(doc.neededItems || '[]'); } catch { return []; } })(),
     createdAt: typeof doc.createdAt === 'string' ? new Date(doc.createdAt).getTime() : (doc.createdAt || Date.now()),
-    requesterUpiId: doc.requesterUpiId || '',
     validationCount: doc.validationCount || 0,
     flagCount: doc.flagCount || 0,
     validatedBy: [],
@@ -71,10 +70,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
 
     const loadRequests = async () => {
         try {
-            const response = await databases.listDocuments(DB_ID, REQ_COL_ID, [
-                Query.orderDesc('createdAt'),
-                Query.limit(100)
-            ]);
+            const response = await databases.listDocuments(DB_ID, REQ_COL_ID);
             const mapped = response.documents.map(mapDoc);
             // Filter out soft-deleted documents
             const active = mapped.filter(r => r.status !== 'Deleted');
@@ -130,13 +126,11 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
                 status: 'Pending',
                 requesterName: req.requesterName,
                 requesterId: req.requesterId || 'anonymous',
-                requesterUpiId: req.requesterUpiId || '',
                 location: JSON.stringify(req.location || {}).substring(0, 99),
                 proofUrls: uploadedUrls,
                 neededItems: JSON.stringify(req.neededItems || []),
                 createdAt: Date.now(),
             };
-
 
             const created = await databases.createDocument(DB_ID, REQ_COL_ID, ID.unique(), docData);
             console.log('[DataContext] Request saved to Appwrite! ID:', created.$id);
