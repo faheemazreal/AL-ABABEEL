@@ -148,3 +148,12 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
 }
+
+/* Make all interactive elements show a pointer cursor on hover */
+button,
+a,
+[role="button"],
+input[type="button"],
+input[type="submit"] {
+  cursor: pointer;
+}

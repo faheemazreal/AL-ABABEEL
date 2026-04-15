@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { CharityRequest, Donation, Verification, Review } from '../types';
+import { CharityRequest, Donation, Verification, Review, Fulfillment } from '../types';
 import { databases, storage, ID } from '../lib/appwrite';
 
 const DB_ID = 'main_db';
@@ -11,11 +11,22 @@ interface DataContextType {
     donations: Donation[];
     verifications: Verification[];
     reviews: Review[];
+    fulfillments: Fulfillment[];
     addRequest: (req: Omit<CharityRequest, 'id' | 'createdAt' | 'status' | 'raisedAmount'>) => Promise<void>;
     addDonation: (don: Omit<Donation, 'id' | 'timestamp'>) => Promise<void>;
     addVerification: (ver: Omit<Verification, 'id' | 'timestamp' | 'status'>) => void;
     addReview: (review: Omit<Review, 'id' | 'timestamp'>) => void;
+    addFulfillment: (ful: Omit<Fulfillment, 'id' | 'timestamp'>) => void;
     updateNeededItem: (requestId: string, itemName: string, amount: number) => Promise<void>;
+    // Community Validation
+    validateRequest: (requestId: string, userId: string) => void;
+    flagRequest: (requestId: string, userId: string) => void;
+    // Admin Controls
+    adminDeleteRequest: (requestId: string) => void;
+    adminOverrideStatus: (requestId: string, status: CharityRequest['status']) => void;
+    // Owner Controls
+    deleteRequest: (requestId: string) => void;
+    updateRequest: (requestId: string, updates: Partial<Pick<CharityRequest, 'title' | 'description' | 'targetAmount' | 'urgency' | 'category'>>) => void;
 }
 
 const DataContext = createContext<DataContextType | null>(null);
@@ -32,10 +43,10 @@ const mapDoc = (doc: any): CharityRequest => ({
     requesterName: doc.requesterName || '',
     title: doc.title || '',
     description: doc.description || '',
-    category: doc.category || 'food',
+    category: doc.category || 'Food',
     targetAmount: Number(doc.targetAmount) || 0,
     raisedAmount: Number(doc.raisedAmount) || 0,
-    urgency: doc.urgency || 'medium',
+    urgency: doc.urgency || 'Medium',
     status: doc.status || 'Pending',
     location: (() => {
         try { return typeof doc.location === 'string' ? JSON.parse(doc.location) : (doc.location || { lat: 0, lng: 0, address: '' }); }
@@ -44,6 +55,10 @@ const mapDoc = (doc: any): CharityRequest => ({
     proofUrls: Array.isArray(doc.proofUrls) ? doc.proofUrls : (() => { try { return JSON.parse(doc.proofUrls || '[]'); } catch { return []; } })(),
     neededItems: (() => { try { return Array.isArray(doc.neededItems) ? doc.neededItems : JSON.parse(doc.neededItems || '[]'); } catch { return []; } })(),
     createdAt: typeof doc.createdAt === 'string' ? new Date(doc.createdAt).getTime() : (doc.createdAt || Date.now()),
+    validationCount: doc.validationCount || 0,
+    flagCount: doc.flagCount || 0,
+    validatedBy: [],
+    flaggedBy: [],
 });
 
 export const DataProvider = ({ children }: { children: React.ReactNode }) => {
@@ -51,13 +66,12 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     const [donations, setDonations] = useState<Donation[]>([]);
     const [verifications, setVerifications] = useState<Verification[]>([]);
     const [reviews, setReviews] = useState<Review[]>([]);
+    const [fulfillments, setFulfillments] = useState<Fulfillment[]>([]);
 
     const loadRequests = async () => {
         try {
-            // FIX 1: No Query.orderDesc — avoids crash if 'createdAt' column type is wrong
             const response = await databases.listDocuments(DB_ID, REQ_COL_ID);
             const mapped = response.documents.map(mapDoc);
-            // Sort client-side instead to be safe
             mapped.sort((a, b) => b.createdAt - a.createdAt);
             setRequests(mapped);
             console.log(`[DataContext] Loaded ${mapped.length} requests from Appwrite.`);
@@ -71,7 +85,6 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     }, []);
 
     const addRequest = async (req: Omit<CharityRequest, 'id' | 'createdAt' | 'status' | 'raisedAmount'>) => {
-        // FIX 2: Optimistic update — request appears immediately for the creator
         const tempId = 'optimistic_' + Math.random().toString(36).substr(2, 9);
         const optimistic: CharityRequest = {
             ...req,
@@ -80,11 +93,14 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
             status: 'Pending',
             raisedAmount: 0,
             neededItems: req.neededItems || [],
+            validationCount: 0,
+            flagCount: 0,
+            validatedBy: [],
+            flaggedBy: [],
         };
         setRequests(prev => [optimistic, ...prev]);
 
         try {
-            // FIX 3: Image upload is isolated — if it fails, the document save still proceeds
             const uploadedUrls: string[] = [];
             for (const base64Data of (req.proofUrls || [])) {
                 try {
@@ -98,7 +114,6 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
                 }
             }
 
-            // FIX 4: Save createdAt as ISO String to avoid Integer column issues
             const docData = {
                 title: req.title,
                 description: req.description,
@@ -110,26 +125,26 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
                 requesterName: req.requesterName,
                 requesterId: req.requesterId || 'anonymous',
                 location: JSON.stringify(req.location || {}).substring(0, 99),
-                proofUrls: uploadedUrls,  // Array type column
-                neededItems: JSON.stringify(req.neededItems || []),  // String type column
-                createdAt: Date.now(),  // Integer type column
+                proofUrls: uploadedUrls,
+                neededItems: JSON.stringify(req.neededItems || []),
+                createdAt: Date.now(),
             };
 
             const created = await databases.createDocument(DB_ID, REQ_COL_ID, ID.unique(), docData);
             console.log('[DataContext] Request saved to Appwrite! ID:', created.$id);
-
-            // Replace optimistic entry with real one from Appwrite
             setRequests(prev => prev.map(r => r.id === tempId ? mapDoc(created) : r));
-
         } catch (err: any) {
-            const msg = err?.message || JSON.stringify(err);
-            console.error('[DataContext] SAVE FAILED:', msg, err);
-            // Optimistic entry stays visible to the creator
+            console.error('[DataContext] SAVE FAILED:', err?.message);
         }
     };
 
     const addDonation = async (don: Omit<Donation, 'id' | 'timestamp'>) => {
-        setDonations(prev => [{ ...don, id: 'don_' + Date.now(), timestamp: Date.now() } as Donation, ...prev]);
+        const newDon: Donation = { ...don, id: 'don_' + Date.now(), timestamp: Date.now() };
+        setDonations(prev => [newDon, ...prev]);
+        // Update raisedAmount on the request
+        setRequests(prev => prev.map(r =>
+            r.id === don.requestId ? { ...r, raisedAmount: r.raisedAmount + don.amount } : r
+        ));
     };
 
     const addVerification = (ver: Omit<Verification, 'id' | 'timestamp' | 'status'>) => {
@@ -142,12 +157,95 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
         setReviews(prev => [{ ...review, id: 'rev_' + Date.now(), timestamp: Date.now() }, ...prev]);
     };
 
-    const updateNeededItem = async (_requestId: string, _itemName: string, _amount: number) => {
-        // TODO: update neededItems JSON in Appwrite document
+    const addFulfillment = (ful: Omit<Fulfillment, 'id' | 'timestamp'>) => {
+        const newFul: Fulfillment = { ...ful, id: 'ful_' + Date.now(), timestamp: Date.now() };
+        setFulfillments(prev => [newFul, ...prev]);
+    };
+
+    const updateNeededItem = async (requestId: string, itemName: string, amount: number) => {
+        setRequests(prev => prev.map(r => {
+            if (r.id !== requestId) return r;
+            const updatedItems = (r.neededItems || []).map(item =>
+                item.name === itemName
+                    ? { ...item, fulfilled: Math.min(item.fulfilled + amount, item.total) }
+                    : item
+            );
+            return { ...r, neededItems: updatedItems };
+        }));
+    };
+
+    // Community Validation
+    const validateRequest = (requestId: string, userId: string) => {
+        setRequests(prev => prev.map(r => {
+            if (r.id !== requestId) return r;
+            const alreadyValidated = (r.validatedBy || []).includes(userId);
+            if (alreadyValidated) return r;
+            return {
+                ...r,
+                validationCount: (r.validationCount || 0) + 1,
+                validatedBy: [...(r.validatedBy || []), userId],
+            };
+        }));
+    };
+
+    const flagRequest = (requestId: string, userId: string) => {
+        setRequests(prev => prev.map(r => {
+            if (r.id !== requestId) return r;
+            const alreadyFlagged = (r.flaggedBy || []).includes(userId);
+            if (alreadyFlagged) return r;
+            const newFlagCount = (r.flagCount || 0) + 1;
+            return {
+                ...r,
+                flagCount: newFlagCount,
+                flaggedBy: [...(r.flaggedBy || []), userId],
+                // Auto-flag status if threshold hit
+                status: newFlagCount >= 3 ? 'Flagged' : r.status,
+            };
+        }));
+    };
+
+    // Admin Controls
+    const adminDeleteRequest = (requestId: string) => {
+        setRequests(prev => prev.filter(r => r.id !== requestId));
+        // Optionally also delete from Appwrite (best effort)
+        databases.deleteDocument(DB_ID, REQ_COL_ID, requestId).catch(() => { });
+    };
+
+    const adminOverrideStatus = (requestId: string, status: CharityRequest['status']) => {
+        setRequests(prev => prev.map(r =>
+            r.id === requestId ? { ...r, status, flagCount: 0, flaggedBy: [] } : r
+        ));
+    };
+
+    // Owner Controls
+    const deleteRequest = (requestId: string) => {
+        setRequests(prev => prev.filter(r => r.id !== requestId));
+        databases.deleteDocument(DB_ID, REQ_COL_ID, requestId).catch(() => { });
+    };
+
+    const updateRequest = (
+        requestId: string,
+        updates: Partial<Pick<CharityRequest, 'title' | 'description' | 'targetAmount' | 'urgency' | 'category'>>
+    ) => {
+        setRequests(prev => prev.map(r => r.id === requestId ? { ...r, ...updates } : r));
+        // Best-effort update to Appwrite
+        databases.updateDocument(DB_ID, REQ_COL_ID, requestId, {
+            ...(updates.title && { title: updates.title }),
+            ...(updates.description && { description: updates.description }),
+            ...(updates.targetAmount !== undefined && { targetAmount: Number(updates.targetAmount) }),
+            ...(updates.urgency && { urgency: updates.urgency }),
+            ...(updates.category && { category: updates.category }),
+        }).catch(() => { });
     };
 
     return (
-        <DataContext.Provider value={{ requests, donations, verifications, reviews, addRequest, addDonation, addVerification, addReview, updateNeededItem }}>
+        <DataContext.Provider value={{
+            requests, donations, verifications, reviews, fulfillments,
+            addRequest, addDonation, addVerification, addReview, addFulfillment,
+            updateNeededItem, validateRequest, flagRequest,
+            adminDeleteRequest, adminOverrideStatus,
+            deleteRequest, updateRequest,
+        }}>
             {children}
         </DataContext.Provider>
     );

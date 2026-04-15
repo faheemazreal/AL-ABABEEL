@@ -13,8 +13,9 @@ import {
   Handshake, Heart, Globe, Sparkles, MapPin, Search, ArrowRight, ShieldCheck,
   Wallet, Plus, Users, Zap, CheckCircle2, AlertCircle, Phone, X, Leaf, HandHeart,
   Map as MapIcon, Share2, MessageSquare, Star, User, Home, Eye, LogOut, Check, ShoppingBag, Truck,
-  Hand, Camera, Clock, ChevronRight, Award, Filter, Store, Package, ExternalLink, Copy, TrendingUp,
-  FileText, LayoutGrid, Info, ShieldAlert, CheckCircle, Navigation,
+  Hand, Camera, Clock, ChevronRight, ChevronLeft, Award, Filter, Store, Package, ExternalLink, Copy, TrendingUp,
+  FileText, LayoutGrid, Info, ShieldAlert, CheckCircle, Navigation, History, ThumbsUp, Flag,
+  Minus, Shield, Trash2, Ban, BarChart3, Gift,
 } from 'lucide-react';
 
 import {
@@ -79,70 +80,118 @@ const Particle = ({ x, y }: ParticleProps) => (
 );
 
 const SuccessAnimation = ({ category, amount }: { category: RequestCategory, amount: number }) => {
-  const getItems = () => {
-    const count = Math.max(1, Math.min(8, Math.floor(amount / (category === 'Food' ? 50 : category === 'Medical' ? 100 : 80))));
-    const emoji = category === 'Food' ? '🍞' : category === 'Medical' ? '💊' : '📚';
-
-    return Array.from({ length: count }).map((_, i) => (
-      <motion.div
-        key={i}
-        initial={{ y: -200, opacity: 0, scale: 0.5 }}
-        animate={{ y: 0, opacity: 1, scale: 1 }}
-        transition={{ delay: i * 0.1, type: "spring", stiffness: 100, damping: 15 }}
-        className="text-4xl absolute z-10 drop-shadow-md"
-        style={{ left: `${(i - count / 2) * 20}px`, transform: `rotate(${(i % 3 - 1) * 15}deg)` }}
-      >
-        {emoji}
-      </motion.div>
-    ));
+  const configs: Record<string, { emoji: string; items: string[]; label: string; bg: string; accent: string }> = {
+    Food: {
+      emoji: '🍽️',
+      items: ['🍞', '🥛', '🍚', '🥗', '🥩', '🍎', '🥦', '🍋'],
+      label: `${Math.max(1, Math.floor(amount / 50))} meals provided`,
+      bg: 'bg-orange-50',
+      accent: 'text-orange-500',
+    },
+    Medical: {
+      emoji: '🏥',
+      items: ['💊', '🩺', '🩹', '💉', '🧪', '🩻'],
+      label: `${Math.max(1, Math.floor(amount / 100))} kits funded`,
+      bg: 'bg-red-50',
+      accent: 'text-red-500',
+    },
+    Education: {
+      emoji: '🎒',
+      items: ['📚', '✏️', '📐', '📒', '🖊️', '📏'],
+      label: `${Math.max(1, Math.floor(amount / 80))} kits provided`,
+      bg: 'bg-blue-50',
+      accent: 'text-blue-500',
+    },
+    Emergency: {
+      emoji: '🛡️',
+      items: ['❤️', '🤝', '✊', '💪', '🌟', '🙏'],
+      label: `Emergency support sent`,
+      bg: 'bg-yellow-50',
+      accent: 'text-yellow-600',
+    },
+    Clothing: {
+      emoji: '👕',
+      items: ['👚', '👗', '🧣', '🧥', '👟', '🧤'],
+      label: `${Math.max(1, Math.floor(amount / 60))} sets funded`,
+      bg: 'bg-purple-50',
+      accent: 'text-purple-500',
+    },
   };
-
-  const container = category === 'Food' ? { emoji: '🍽️', label: 'Food Plate' } :
-    category === 'Medical' ? { emoji: '📦', label: 'Medical Kit' } :
-      { emoji: '🎒', label: 'School Kit' };
+  const cfg = configs[category] || configs['Emergency'];
+  const count = Math.min(6, Math.max(3, Math.floor(amount / 80)));
+  const displayItems = cfg.items.slice(0, count);
 
   return (
-    <div className="relative flex flex-col items-center justify-center p-6 md:p-12 bg-white/40 rounded-[3rem] md:rounded-[4rem] border-4 border-black border-dashed min-h-[300px] overflow-hidden">
+    <div className={`relative flex flex-col items-center justify-center p-6 ${cfg.bg} rounded-[2rem] border-4 border-black border-dashed min-h-[260px] overflow-hidden`}>
+      {/* Ambient glow */}
       <motion.div
-        animate={{ scale: [1, 1.05, 1], opacity: [0.1, 0.2, 0.1] }}
+        animate={{ scale: [1, 1.3, 1], opacity: [0.15, 0.3, 0.15] }}
         transition={{ duration: 3, repeat: Infinity }}
-        className="absolute inset-0 bg-yellow-400/20 blur-[60px]"
+        className="absolute inset-0 bg-current/10 blur-[70px]"
       />
 
-      <div className="relative z-10 flex flex-col items-center justify-center">
-        <div className="relative flex items-center justify-center h-48 w-full max-w-[200px] mx-auto">
-          {getItems()}
-
+      {/* Floating items arc */}
+      <div className="relative flex items-end justify-center gap-2 mb-4">
+        {displayItems.map((item, i) => (
           <motion.div
-            animate={{ y: [-5, 5, -5] }}
-            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            className="text-[8rem] mt-16 opacity-90 drop-shadow-[0_20px_40px_rgba(0,0,0,0.2)] z-0"
+            key={i}
+            initial={{ y: -120, opacity: 0, rotate: -30, scale: 0 }}
+            animate={{ y: 0, opacity: 1, rotate: (i % 3 - 1) * 12, scale: 1 }}
+            transition={{ delay: i * 0.12, type: 'spring', stiffness: 200, damping: 16 }}
+            className="text-3xl drop-shadow-lg"
+            style={{ marginTop: `${Math.abs(i - displayItems.length / 2) * 6}px` }}
           >
-            {container.emoji}
+            {item}
           </motion.div>
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="mt-8 bg-black text-white px-6 py-2 rounded-2xl border-2 border-white font-black italic uppercase tracking-widest text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
-        >
-          {container.label}
-        </motion.div>
+        ))}
       </div>
 
+      {/* Main emoji with bounce */}
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.8 }}
-        className="mt-8 text-[10px] font-black uppercase text-black"
+        initial={{ scale: 0, rotate: -20 }}
+        animate={{ scale: 1, rotate: 0 }}
+        transition={{ type: 'spring', stiffness: 260, damping: 18, delay: 0.3 }}
+        className="text-[5rem] drop-shadow-2xl"
       >
-        <span className="bg-yellow-400 px-4 py-1.5 rounded-full border-2 border-black inline-flex items-center gap-2">
-          Generating Impact...
-        </span>
+        {cfg.emoji}
+      </motion.div>
+
+      {/* Pulse ring */}
+      <motion.div
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: [1, 1.4, 1], opacity: [0.4, 0, 0.4] }}
+        transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+        className="absolute w-32 h-32 rounded-full border-4 border-current opacity-20"
+      />
+
+      {/* Impact label */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.7 }}
+        className={`mt-4 font-black italic uppercase tracking-widest text-sm ${cfg.accent}`}
+      >
+        {cfg.label}
       </motion.div>
     </div>
+  );
+};
+
+// Confetti particle for PaymentSuccessOverlay
+const ConfettiParticle = ({ delay }: { delay: number }) => {
+  const emojis = ['🎉', '⭐', '✨', '💛', '🌟', '🎊'];
+  const emoji = emojis[Math.floor(delay * emojis.length * 7) % emojis.length];
+  const left = ((delay * 137.5) % 100);
+  return (
+    <motion.div
+      initial={{ y: -60, opacity: 0, x: 0, rotate: 0 }}
+      animate={{ y: '110vh', opacity: [0, 1, 1, 0], x: [0, (delay - 0.5) * 80], rotate: 360 }}
+      transition={{ duration: 3 + delay * 2, delay: delay * 0.4, ease: 'easeIn' }}
+      className="fixed text-2xl pointer-events-none z-[400]"
+      style={{ left: `${left}%`, top: 0 }}
+    >
+      {emoji}
+    </motion.div>
   );
 };
 
@@ -150,39 +199,61 @@ const PaymentSuccessOverlay = ({ category, amount, onClose }: { category: Reques
   <motion.div
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
-    className="fixed inset-0 z-[300] bg-yellow-400 flex flex-col items-center justify-center p-6 text-center"
+    exit={{ opacity: 0 }}
+    className="fixed inset-0 z-[300] bg-yellow-400 flex flex-col items-center justify-center p-6 text-center overflow-hidden"
   >
-    <motion.div
-      initial={{ scale: 0.5, y: 50 }}
-      animate={{ scale: 1, y: 0 }}
-      className="max-w-md w-full space-y-8"
-    >
-      <div className="w-24 h-24 bg-black rounded-full flex items-center justify-center mx-auto border-4 border-white shadow-[0_0_40px_rgba(0,0,0,0.2)]">
-        <Check size={48} className="text-yellow-400" />
-      </div>
+    {/* Confetti rain */}
+    {[...Array(12)].map((_, i) => <React.Fragment key={i}><ConfettiParticle delay={i * 0.08} /></React.Fragment>)}
 
-      <div className="space-y-2">
+    <motion.div
+      initial={{ scale: 0.5, y: 60 }}
+      animate={{ scale: 1, y: 0 }}
+      transition={{ type: 'spring', stiffness: 200, damping: 18 }}
+      className="max-w-md w-full space-y-6 relative z-10"
+    >
+      {/* Check circle */}
+      <motion.div
+        initial={{ scale: 0, rotate: -180 }}
+        animate={{ scale: 1, rotate: 0 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+        className="w-24 h-24 bg-black rounded-full flex items-center justify-center mx-auto border-4 border-white shadow-[0_0_60px_rgba(0,0,0,0.3)]"
+      >
+        <Check size={48} className="text-yellow-400" />
+      </motion.div>
+
+      <div className="space-y-1">
         <h2 className="text-5xl font-black italic tracking-tighter uppercase leading-none">Impact Created!</h2>
         <p className="text-black font-bold uppercase tracking-widest text-sm">You just donated ₹{amount}</p>
       </div>
 
       <SuccessAnimation category={category} amount={amount} />
 
-      <div className="bg-black text-white p-6 rounded-3xl border-4 border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,0.2)]">
-        <p className="font-black italic text-lg mb-2">
-          {category === 'Food' ? "A plate is being filled right now!" :
-            category === 'Medical' ? "Medicine is on its way!" :
-              "You've empowered a student's future!"}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
+        className="bg-black text-white p-5 rounded-3xl border-4 border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,0.2)]"
+      >
+        <p className="font-black italic text-lg mb-1">
+          {category === 'Food' ? '🍽️ A plate is being filled right now!' :
+            category === 'Medical' ? '💊 Medicine is on its way!' :
+              category === 'Education' ? '📚 A student\'s future is brighter!' :
+                '🛡️ Emergency support is dispatched!'}
         </p>
-        <p className="text-[10px] font-black uppercase text-yellow-400 tracking-widest">Transaction Verified on Network</p>
-      </div>
+        <p className="text-[10px] font-black uppercase text-yellow-400 tracking-widest">Transaction Verified · Blockchain Secured</p>
+      </motion.div>
 
-      <Button onClick={onClose} className="w-full h-16 bg-white text-black border-4 border-black font-black uppercase tracking-widest text-xl rounded-2xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-        Continue Helping
+      <Button
+        onClick={onClose}
+        className="w-full h-16 bg-white text-black border-4 border-black font-black uppercase tracking-widest text-xl rounded-2xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
+      >
+        Continue Helping 🌍
       </Button>
     </motion.div>
   </motion.div>
 );
+
+
 
 const VisualDonation = ({ amount, target, category }: { amount: number, target: number, category: RequestCategory }) => {
   const safeAmount = amount || 0;
@@ -242,8 +313,12 @@ const UPIDonationModal: React.FC<{
   onClose: () => void;
   upiId: string;
   title: string;
-}> = ({ isOpen, onClose, upiId, title }) => {
+  amount?: number;
+}> = ({ isOpen, onClose, upiId, title, amount = 100 }) => {
   const [copied, setCopied] = useState(false);
+  const [notInstalled, setNotInstalled] = useState(false);
+
+  const upiUrl = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(title)}&am=${amount}&cu=INR`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(upiId);
@@ -251,31 +326,77 @@ const UPIDonationModal: React.FC<{
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleUPIPay = () => {
+    // Try to open UPI deep link
+    const a = document.createElement('a');
+    a.href = upiUrl;
+    a.click();
+    // Detect if app didn't open (user stays on page)
+    setTimeout(() => setNotInstalled(true), 1500);
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) { onClose(); setNotInstalled(false); } }}>
       <DialogContent className="border-4 border-black rounded-[2rem] p-8 max-w-sm">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-black italic uppercase tracking-tighter">Donate to {title}</DialogTitle>
+          <DialogTitle className="text-2xl font-black italic uppercase tracking-tighter">Pay ₹{amount} via UPI</DialogTitle>
           <DialogDescription className="font-bold text-gray-600">
-            Transfer directly to the requester using any UPI app.
+            Use Google Pay, PhonePe, Paytm or any UPI app.
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-6 py-4">
-          <div className="p-6 bg-yellow-50 border-2 border-black border-dashed rounded-2xl flex flex-col items-center gap-4">
-            <div className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Requester UPI ID</div>
-            <div className="text-xl font-black italic tracking-tight">{upiId}</div>
-            <Button
-              variant="outline"
-              className="border-2 border-black font-black uppercase text-xs h-10 px-6"
-              onClick={handleCopy}
-            >
-              {copied ? <Check size={16} className="mr-2" /> : <Copy size={16} className="mr-2" />}
-              {copied ? 'Copied' : 'Copy ID'}
-            </Button>
+        <div className="space-y-4 py-2">
+          {/* UPI Deep Link Buttons */}
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { name: 'Google Pay', scheme: `gpay://upi/pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(title)}&am=${amount}&cu=INR`, color: 'bg-blue-50 border-blue-200', emoji: '🟢' },
+              { name: 'PhonePe', scheme: `phonepe://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(title)}&am=${amount}&cu=INR`, color: 'bg-purple-50 border-purple-200', emoji: '🟣' },
+              { name: 'Paytm', scheme: `paytmmp://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(title)}&am=${amount}&cu=INR`, color: 'bg-sky-50 border-sky-200', emoji: '🔵' },
+            ].map(app => (
+              <button
+                key={app.name}
+                onClick={() => {
+                  const a = document.createElement('a');
+                  a.href = app.scheme;
+                  a.click();
+                  setTimeout(() => setNotInstalled(true), 1500);
+                }}
+                className={`p-3 ${app.color} border-2 rounded-2xl flex flex-col items-center gap-1 font-black text-[10px] uppercase tracking-widest hover:opacity-80 transition-opacity`}
+              >
+                <span className="text-2xl">{app.emoji}</span>
+                {app.name}
+              </button>
+            ))}
           </div>
-          <Button className="w-full h-14 bg-black text-white border-2 border-black font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(34,197,94,1)]">
-            Open UPI App <ExternalLink size={18} className="ml-2" />
+
+          <Button
+            onClick={handleUPIPay}
+            className="w-full h-12 bg-black text-white border-2 border-black font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(34,197,94,1)]"
+          >
+            Open Any UPI App <ExternalLink size={16} className="ml-2" />
           </Button>
+
+          {/* Fallback: copy UPI ID */}
+          {notInstalled && (
+            <div className="p-4 bg-yellow-50 border-2 border-yellow-400 border-dashed rounded-2xl space-y-3">
+              <p className="text-xs font-black uppercase text-yellow-700">⚠️ App not detected? Copy UPI ID manually:</p>
+              <div className="flex items-center gap-2 bg-white border-2 border-black rounded-xl p-3">
+                <span className="flex-1 font-black text-sm truncate">{upiId}</span>
+                <Button size="sm" variant="outline" onClick={handleCopy} className="border-2 border-black h-8 font-black text-xs shrink-0">
+                  {copied ? <Check size={12} /> : <Copy size={12} />}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          <div className="p-4 bg-gray-50 border-2 border-black border-dashed rounded-2xl">
+            <div className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-1">UPI ID</div>
+            <div className="font-black italic flex items-center justify-between gap-2">
+              <span className="truncate text-sm">{upiId}</span>
+              <button onClick={handleCopy} className="shrink-0 text-green-600 font-black text-xs uppercase flex items-center gap-1">
+                {copied ? <><Check size={12} /> Copied!</> : <><Copy size={12} /> Copy</>}
+              </button>
+            </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
@@ -303,7 +424,7 @@ const RequestCard: React.FC<{ request: CharityRequest }> = ({ request }) => {
       <UPIDonationModal
         isOpen={showUPI}
         onClose={() => setShowUPI(false)}
-        upiId="charity@okaxis"
+        upiId={localStorage.getItem('aidconnect_upi') || request.requesterId?.substring(0, 8) + '@okaxis' || 'charity@okaxis'}
         title={request.title}
       />
       <Card
@@ -314,7 +435,7 @@ const RequestCard: React.FC<{ request: CharityRequest }> = ({ request }) => {
           <motion.img
             whileHover={{ scale: 1.1 }}
             transition={{ duration: 0.6 }}
-            src={request.proofUrls[0]}
+            src={request.proofUrls?.[0] || `https://ui-avatars.com/api/?name=${encodeURIComponent(request.title)}&background=fde047&color=000000&bold=true&size=400`}
             alt={request.title}
             className="w-full h-full object-cover"
             referrerPolicy="no-referrer"
@@ -528,11 +649,15 @@ const SplashScreen = ({ onFinish }: { onFinish: () => void }) => {
 };
 
 const AuthPage = () => {
-  const { login, register } = useAuth();
+  const { login, register, setAdminUser } = useAuth();
   const [step, setStep] = useState(1);
   const [errorMsg, setErrorMsg] = useState(localStorage.getItem('aidconnect_last_error') || "");
   const [loading, setLoading] = useState(false);
   const [isLogin, setIsLogin] = useState(false);
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [adminEmail, setAdminEmail] = useState('');
+  const [adminPass, setAdminPass] = useState('');
+  const [adminError, setAdminError] = useState('');
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -703,6 +828,68 @@ const AuthPage = () => {
                         <span className="text-green-600 font-black"> {isLogin ? "Sign Up" : "Log In"}</span>
                       </button>
                     </div>
+
+
+                    {/* Admin Login Section */}
+                    <div className="pt-4 border-t-2 border-dashed border-gray-200">
+                      <button
+                        onClick={() => setShowAdminLogin(!showAdminLogin)}
+                        className="w-full flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-gray-900 transition-colors py-2"
+                      >
+                        <Shield size={12} />
+                        {showAdminLogin ? 'Hide Admin Login' : 'Admin Login'}
+                      </button>
+                      {showAdminLogin && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="mt-4 p-5 bg-gray-950 rounded-2xl border-2 border-gray-800 space-y-3"
+                        >
+                          <div className="flex items-center gap-2 mb-3">
+                            <Shield size={16} className="text-yellow-400" />
+                            <span className="text-yellow-400 font-black uppercase text-xs tracking-widest">Admin Portal</span>
+                          </div>
+                          <Input
+                            placeholder="admin@alababeel.com"
+                            value={adminEmail}
+                            onChange={e => setAdminEmail(e.target.value)}
+                            className="h-12 bg-gray-900 border-gray-700 text-white placeholder:text-gray-600 font-bold"
+                          />
+                          <Input
+                            type="password"
+                            placeholder="Admin password"
+                            value={adminPass}
+                            onChange={e => setAdminPass(e.target.value)}
+                            className="h-12 bg-gray-900 border-gray-700 text-white placeholder:text-gray-600 font-bold"
+                          />
+                          {adminError && (
+                            <p className="text-red-400 text-[10px] font-black uppercase">{adminError}</p>
+                          )}
+                          <Button
+                            onClick={() => {
+                              setAdminError('');
+                              if (adminEmail === 'admin@alababeel.com' && adminPass === 'Admin@2025') {
+                                const adminUser = {
+                                  uid: 'admin_001',
+                                  displayName: 'Admin',
+                                  email: 'admin@alababeel.com',
+                                  photoURL: 'https://ui-avatars.com/api/?name=Admin&background=000000&color=facc15&bold=true',
+                                  role: 'admin' as const,
+                                  reputation: 100,
+                                };
+                                localStorage.setItem('aidconnect_user', JSON.stringify(adminUser));
+                                window.location.reload();
+                              } else {
+                                setAdminError('Invalid admin credentials');
+                              }
+                            }}
+                            className="w-full h-11 bg-yellow-400 text-black border-2 border-yellow-500 font-black uppercase tracking-widest text-xs shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                          >
+                            Login as Admin <Shield size={14} className="ml-2" />
+                          </Button>
+                        </motion.div>
+                      )}
+                    </div>
                   </>
                 )}
               </motion.div>
@@ -843,8 +1030,8 @@ const AuthPage = () => {
             <span>Terms</span>
           </div>
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 };
 
@@ -886,9 +1073,17 @@ const HomePage = () => {
   const { user } = useAuth();
   const { requests, donations } = useData();
   const [filter, setFilter] = useState<RequestCategory | 'All'>('All');
+  const [search, setSearch] = useState('');
   const navigate = useNavigate();
 
-  const filteredRequests = filter === 'All' ? requests : requests.filter(r => r.category === filter);
+  const totalRaised = requests.reduce((s, r) => s + r.raisedAmount, 0);
+  const totalDonors = donations.length;
+
+  const filteredRequests = requests.filter(r => {
+    const matchesFilter = filter === 'All' || r.category === filter;
+    const matchesSearch = search === '' || r.title.toLowerCase().includes(search.toLowerCase()) || r.description.toLowerCase().includes(search.toLowerCase());
+    return matchesFilter && matchesSearch;
+  });
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -1035,10 +1230,41 @@ const HomePage = () => {
         </div>
       </motion.div>
 
+      {/* Stats Banner */}
+      <motion.div variants={itemVariants} className="px-6 mt-10">
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            { label: 'Total Raised', value: `₹${requests.reduce((s, r) => s + r.raisedAmount, 0).toLocaleString()}`, emoji: '💰' },
+            { label: 'Requests', value: requests.length, emoji: '📋' },
+            { label: 'Donors', value: donations.length, emoji: '🤝' },
+          ].map(stat => (
+            <div key={stat.label} className="bg-white border-2 border-black rounded-2xl p-3 text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <div className="text-xl mb-1">{stat.emoji}</div>
+              <div className="text-lg font-black italic tracking-tighter leading-none">{stat.value}</div>
+              <div className="text-[8px] font-black uppercase text-gray-400 tracking-widest mt-0.5">{stat.label}</div>
+            </div>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* Search Bar */}
+      <motion.div variants={itemVariants} className="px-6 mt-6">
+        <div className="flex gap-3 items-center bg-white border-4 border-black rounded-2xl h-14 px-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <Search size={18} className="text-gray-400 shrink-0" />
+          <input
+            className="flex-1 bg-transparent outline-none font-bold text-base placeholder:text-gray-300"
+            placeholder="Search requests..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+          {search && <button onClick={() => setSearch('')} className="text-gray-400 hover:text-black transition-colors text-sm font-black">✕</button>}
+        </div>
+      </motion.div>
+
       {/* Categories Scroller */}
       <motion.div
         variants={itemVariants}
-        className="px-6 mt-12"
+        className="px-6 mt-6"
       >
         <div className="flex gap-4 overflow-x-auto pb-6 no-scrollbar">
           {['All', 'Food', 'Medical', 'Emergency', 'Education'].map((cat) => (
@@ -1063,18 +1289,26 @@ const HomePage = () => {
         <div className="flex justify-between items-end">
           <div>
             <h3 className="text-4xl font-black italic tracking-tighter uppercase leading-none">Active Causes</h3>
-            <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest mt-2">Verified requests in your area</p>
+            <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest mt-2">{filteredRequests.length} requests in your area</p>
           </div>
           <motion.button
             whileHover={{ x: 5 }}
+            onClick={() => navigate('/map')}
             className="text-[10px] font-black uppercase text-blue-500 border-b-2 border-blue-500/20 pb-1 tracking-widest"
           >
-            View Map
+            View Map →
           </motion.button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
-          {filteredRequests.map((req) => (
+          {filteredRequests.length === 0 ? (
+            <div className="col-span-full flex flex-col items-center justify-center py-20 gap-4">
+              <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 3, repeat: Infinity }} className="text-6xl">🔍</motion.div>
+              <h4 className="text-2xl font-black italic uppercase">No requests found</h4>
+              <p className="text-gray-400 font-bold text-sm uppercase tracking-widest">{search ? 'Try a different search term' : 'Be the first to create a request!'}</p>
+              {search && <button onClick={() => setSearch('')} className="text-[10px] font-black uppercase text-blue-500 border-b border-blue-500/20">Clear Search</button>}
+            </div>
+          ) : filteredRequests.map((req) => (
             <RequestCard key={req.id} request={req} />
           ))}
         </div>
@@ -1085,7 +1319,7 @@ const HomePage = () => {
 
 const RequestDetailPage = () => {
   const { id } = useParams();
-  const { requests, donations, verifications, reviews, addDonation, addReview, updateNeededItem } = useData();
+  const { requests, donations, verifications, reviews, addDonation, addReview, updateNeededItem, validateRequest, flagRequest, deleteRequest, updateRequest } = useData();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [isDonating, setIsDonating] = useState(false);
@@ -1098,6 +1332,14 @@ const RequestDetailPage = () => {
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState('');
   const [showShareFeedback, setShowShareFeedback] = useState(false);
+  // Owner controls
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDesc, setEditDesc] = useState('');
+  const [editTarget, setEditTarget] = useState('');
+  const [editUrgency, setEditUrgency] = useState('');
+  const [editCategory, setEditCategory] = useState('');
 
   const request = requests.find(r => r.id === id);
   const requestDonations = donations.filter(d => d.requestId === id);
@@ -1166,12 +1408,27 @@ const RequestDetailPage = () => {
 
   return (
     <div className="pb-32 max-w-4xl mx-auto">
+      {/* Back Button */}
+      <div className="sticky top-0 z-30 pt-4 px-6 pb-2 bg-white/80 backdrop-blur-md">
+        <motion.button
+          whileHover={{ x: -4 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-black transition-colors"
+        >
+          <ChevronLeft size={16} className="shrink-0" />
+          Back to Feed
+        </motion.button>
+      </div>
+
       <UPIDonationModal
         isOpen={showUPI}
         onClose={() => setShowUPI(false)}
-        upiId="charity@okaxis"
+        upiId={localStorage.getItem('aidconnect_upi') || (request.requesterId ? `${request.requesterId.substring(0, 8)}@okaxis` : 'charity@okaxis')}
         title={request.title}
+        amount={parseInt(donationAmount) || 100}
       />
+
       <AnimatePresence>
         {showSuccess && (
           <PaymentSuccessOverlay
@@ -1185,7 +1442,113 @@ const RequestDetailPage = () => {
         )}
       </AnimatePresence>
 
+      {/* Edit Modal */}
+      <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+        <DialogContent className="border-4 border-black rounded-[2rem] p-8 max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-black italic uppercase tracking-tighter">Edit Your Request</DialogTitle>
+            <DialogDescription className="text-xs font-bold text-gray-400 uppercase tracking-widest">Update the details of your request</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-gray-500 uppercase">Title</label>
+              <Input value={editTitle} onChange={e => setEditTitle(e.target.value)} className="h-12 border-2 border-black rounded-xl font-bold" />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-gray-500 uppercase">Description</label>
+              <Textarea value={editDesc} onChange={e => setEditDesc(e.target.value)} className="border-2 border-black rounded-xl font-bold min-h-[100px]" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-500 uppercase">Target Amount (₹)</label>
+                <Input type="number" value={editTarget} onChange={e => setEditTarget(e.target.value)} className="h-12 border-2 border-black rounded-xl font-bold" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-500 uppercase">Urgency</label>
+                <Select value={editUrgency} onValueChange={setEditUrgency}>
+                  <SelectTrigger className="h-12 border-2 border-black rounded-xl font-bold">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="High">🔴 High</SelectItem>
+                    <SelectItem value="Medium">🟡 Medium</SelectItem>
+                    <SelectItem value="Low">🟢 Low</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="mt-6 flex gap-2">
+            <Button variant="outline" onClick={() => setShowEditModal(false)} className="h-12 border-2 border-black font-black uppercase">Cancel</Button>
+            <Button
+              onClick={() => {
+                updateRequest(request.id, {
+                  title: editTitle || request.title,
+                  description: editDesc || request.description,
+                  targetAmount: editTarget ? parseInt(editTarget) : request.targetAmount,
+                  urgency: (editUrgency as any) || request.urgency,
+                });
+                setShowEditModal(false);
+              }}
+              className="h-12 bg-black text-white border-2 border-black font-black uppercase shadow-[4px_4px_0px_0px_rgba(253,224,71,1)]"
+            >
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirm Dialog */}
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent className="border-4 border-red-500 rounded-[2rem] p-8 max-w-sm text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Trash2 size={32} className="text-red-500" />
+          </div>
+          <h3 className="text-2xl font-black italic uppercase tracking-tighter mb-2">Delete Request?</h3>
+          <p className="text-sm text-gray-500 font-bold mb-6">This action cannot be undone. Your request will be permanently removed.</p>
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={() => setShowDeleteConfirm(false)} className="flex-1 h-12 border-2 border-black font-black uppercase">Cancel</Button>
+            <Button
+              onClick={() => { deleteRequest(request.id); navigate('/'); }}
+              className="flex-1 h-12 bg-red-500 text-white border-2 border-red-700 font-black uppercase"
+            >
+              Delete
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Owner Action Bar */}
+      {user?.uid === request.requesterId && (
+        <div className="fixed top-4 right-4 z-40 flex gap-2">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => {
+              setEditTitle(request.title);
+              setEditDesc(request.description);
+              setEditTarget(String(request.targetAmount));
+              setEditUrgency(request.urgency);
+              setEditCategory(request.category);
+              setShowEditModal(true);
+            }}
+            className="flex items-center gap-2 bg-white border-4 border-black px-4 py-2 rounded-2xl font-black text-xs uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-yellow-50"
+          >
+            <FileText size={14} /> Edit
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowDeleteConfirm(true)}
+            className="flex items-center gap-2 bg-red-500 text-white border-4 border-black px-4 py-2 rounded-2xl font-black text-xs uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+          >
+            <Trash2 size={14} /> Delete
+          </motion.button>
+        </div>
+      )}
+
       <Dialog open={showReviewForm} onOpenChange={setShowReviewForm}>
+
         <DialogContent className="border-4 border-black rounded-[2rem] p-8">
           <DialogHeader>
             <DialogTitle className="text-2xl font-black italic uppercase tracking-tighter">Leave a Review</DialogTitle>
@@ -1287,7 +1650,7 @@ const RequestDetailPage = () => {
       <div className="px-6 mt-16 space-y-8">
         <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl border-2 border-black border-dashed">
           <Avatar className="w-12 h-12 border-2 border-black">
-            <AvatarImage src={`https://picsum.photos/seed/${request.requesterId}/100/100`} />
+            <AvatarImage src={request.requesterId === user?.uid && user?.photoURL ? user.photoURL : `https://picsum.photos/seed/${request.requesterId}/100/100`} />
             <AvatarFallback>{request.requesterName[0]}</AvatarFallback>
           </Avatar>
           <div>
@@ -1300,6 +1663,46 @@ const RequestDetailPage = () => {
         <div className="space-y-4">
           <h3 className="text-xl font-black italic uppercase tracking-tight">The Cause</h3>
           <p className="text-gray-600 font-bold leading-relaxed">{request.description}</p>
+        </div>
+
+        {/* Community Validation */}
+        <div className="p-6 bg-white border-4 border-black rounded-[2rem] shadow-[8px_8px_0px_0px_rgba(0,0,0,0.05)]">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 bg-blue-100 rounded-xl border-2 border-black flex items-center justify-center">
+              <Shield size={20} className="text-blue-600" />
+            </div>
+            <div>
+              <h4 className="text-lg font-black italic uppercase tracking-tight">Community Validation</h4>
+              <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Help others trust this request</p>
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => user && validateRequest(request.id, user.uid)}
+              className={`flex-1 flex items-center justify-center gap-2 h-14 rounded-2xl border-4 border-black font-black uppercase text-xs tracking-widest transition-all ${(request.validatedBy || []).includes(user?.uid || '')
+                ? 'bg-green-500 text-black shadow-none translate-x-0.5 translate-y-0.5'
+                : 'bg-green-100 text-green-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-green-200'
+                }`}
+            >
+              <ThumbsUp size={18} />
+              Valid ({request.validationCount || 0})
+            </motion.button>
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => user && flagRequest(request.id, user.uid)}
+              className={`flex-1 flex items-center justify-center gap-2 h-14 rounded-2xl border-4 border-black font-black uppercase text-xs tracking-widest transition-all ${(request.flaggedBy || []).includes(user?.uid || '')
+                ? 'bg-red-500 text-white shadow-none translate-x-0.5 translate-y-0.5'
+                : 'bg-red-100 text-red-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-red-200'
+                }`}
+            >
+              <Flag size={18} />
+              Suspicious ({request.flagCount || 0})
+            </motion.button>
+          </div>
+          {!user && (
+            <p className="text-center text-xs font-bold text-gray-400 mt-3">Log in to vote on this request</p>
+          )}
         </div>
 
         <VisualDonation amount={request.raisedAmount} target={request.targetAmount} category={request.category} />
@@ -2270,30 +2673,81 @@ L.Marker.prototype.options.icon = DefaultIcon;
 const MapPage = () => {
   const { requests } = useData();
   const navigate = useNavigate();
+  const [mapSearch, setMapSearch] = useState('');
+  const [mapFilter, setMapFilter] = useState<RequestCategory | 'All'>('All');
+
+  const CATEGORY_COLORS: Record<string, string> = {
+    Food: '#f97316',
+    Medical: '#ef4444',
+    Education: '#3b82f6',
+    Emergency: '#eab308',
+    Clothing: '#a855f7',
+    All: '#000000',
+  };
+
+  const markerIcon = (category: string) => {
+    const color = CATEGORY_COLORS[category] || '#000';
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 32 40">
+      <path d="M16 0C7.2 0 0 7.2 0 16c0 12 16 24 16 24S32 28 32 16C32 7.2 24.8 0 16 0z" fill="${color}" stroke="white" stroke-width="2.5"/>
+      <circle cx="16" cy="16" r="7" fill="white" opacity="0.9"/>
+    </svg>`;
+    const L = (window as any).L;
+    return L?.divIcon({
+      html: `<div style="background:transparent">${svg}</div>`,
+      iconSize: [32, 40],
+      iconAnchor: [16, 40],
+      popupAnchor: [0, -42],
+      className: '',
+    });
+  };
+
+  const filtered = requests.filter(r => {
+    const matchCat = mapFilter === 'All' || r.category === mapFilter;
+    const matchSearch = mapSearch === '' || r.title.toLowerCase().includes(mapSearch.toLowerCase());
+    return matchCat && matchSearch;
+  });
 
   return (
     <div className="h-screen relative bg-gray-100 overflow-hidden">
       <MapContainer
         center={[12.9716, 77.5946]}
-        zoom={13}
+        zoom={12}
         className="h-full w-full z-0"
         zoomControl={false}
       >
         <TileLayer
           url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+          attribution='&copy; OpenStreetMap contributors &copy; CARTO'
         />
-        {requests.map((req) => (
+        {filtered.map((req) => (
           <Marker
             key={req.id}
-            position={[req.location.lat, req.location.lng]}
-            eventHandlers={{
-              click: () => navigate(`/request/${req.id}`)
-            }}
+            position={[req.location.lat || 12.9716, req.location.lng || 77.5946]}
+            icon={markerIcon(req.category)}
           >
-            <Popup className="custom-popup">
-              <div className="p-2 font-black uppercase text-[10px] tracking-tighter">
-                {req.title}
+            <Popup className="custom-popup" minWidth={220}>
+              <div className="p-3 space-y-2 font-sans">
+                <div className="flex gap-2 flex-wrap">
+                  <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">{req.category}</span>
+                  <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${req.urgency === 'High' ? 'bg-red-100 text-red-600' : req.urgency === 'Medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'}`}>{req.urgency}</span>
+                </div>
+                <div className="font-black text-sm uppercase leading-tight">{req.title}</div>
+                <div className="text-[10px] text-gray-500 font-bold">{req.location.address}</div>
+                <div className="space-y-1">
+                  <div className="flex justify-between text-[9px] font-black uppercase">
+                    <span>Raised</span>
+                    <span>₹{req.raisedAmount.toLocaleString()} / ₹{req.targetAmount.toLocaleString()}</span>
+                  </div>
+                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden border border-gray-300">
+                    <div className="h-full bg-yellow-400 transition-all" style={{ width: `${Math.min((req.raisedAmount / req.targetAmount) * 100, 100)}%` }} />
+                  </div>
+                </div>
+                <button
+                  onClick={() => navigate(`/request/${req.id}`)}
+                  className="w-full mt-1 py-1.5 bg-black text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-gray-800 transition-colors"
+                >
+                  View Request →
+                </button>
               </div>
             </Popup>
           </Marker>
@@ -2301,60 +2755,92 @@ const MapPage = () => {
       </MapContainer>
 
       {/* Floating Header */}
-      <div className="absolute top-12 left-0 right-0 z-10 px-6 flex justify-center">
-        <div className="w-full max-w-2xl space-y-4">
-          <div className="flex gap-3">
-            <div className="flex-1 bg-white border-4 border-black rounded-2xl h-14 flex items-center px-6 gap-3 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-              <Search size={24} className="text-gray-400" />
-              <input className="bg-transparent outline-none font-black text-lg w-full placeholder:text-gray-300" placeholder="Search local causes..." />
+      <div className="absolute top-4 left-0 right-0 z-10 px-4 flex justify-center">
+        <div className="w-full max-w-2xl space-y-3">
+          {/* Search */}
+          <div className="flex gap-2">
+            <div className="flex-1 bg-white border-4 border-black rounded-2xl h-14 flex items-center px-5 gap-3 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+              <Search size={20} className="text-gray-400 shrink-0" />
+              <input
+                className="bg-transparent outline-none font-black text-base w-full placeholder:text-gray-300"
+                placeholder="Search causes..."
+                value={mapSearch}
+                onChange={e => setMapSearch(e.target.value)}
+              />
+              {mapSearch && (
+                <button onClick={() => setMapSearch('')} className="text-gray-400 hover:text-black transition-colors">✕</button>
+              )}
             </div>
-            <button className="w-14 h-14 bg-black text-white border-4 border-black rounded-2xl flex items-center justify-center shadow-[8px_8px_0px_0px_rgba(253,224,71,1)] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all">
-              <Filter size={24} />
+            <button
+              onClick={() => navigate('/')}
+              className="w-14 h-14 bg-white text-black border-4 border-black rounded-2xl flex items-center justify-center shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:bg-gray-50 transition-colors"
+              title="Back to feed"
+            >
+              ←
             </button>
           </div>
 
-          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
-            {['All', 'Food', 'Medical', 'Emergency'].map(cat => (
-              <Badge key={cat} className="bg-white text-black border-2 border-black px-4 py-1.5 font-black uppercase text-[10px] whitespace-nowrap shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          {/* Category Filter */}
+          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+            {(['All', 'Food', 'Medical', 'Emergency', 'Education', 'Clothing'] as const).map(cat => (
+              <button
+                key={cat}
+                onClick={() => setMapFilter(cat as any)}
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl border-2 border-black font-black uppercase text-[9px] whitespace-nowrap transition-all shadow-[3px_3px_0px_0px_rgba(0,0,0,0.8)] ${mapFilter === cat ? 'bg-black text-white' : 'bg-white text-black hover:bg-gray-50'}`}
+              >
+                {cat !== 'All' && <span className="w-2 h-2 rounded-full" style={{ backgroundColor: CATEGORY_COLORS[cat] }} />}
                 {cat}
-              </Badge>
+              </button>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Bottom Cards Preview */}
-      <div className="absolute bottom-32 left-0 right-0 z-10 px-6 flex justify-center">
-        <div className="w-full max-w-4xl overflow-x-auto flex gap-6 no-scrollbar pb-6">
-          {requests.map(req => (
+      {/* Results count badge */}
+      <div className="absolute top-36 right-4 z-10">
+        <div className="bg-black text-white px-3 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-widest border-2 border-white shadow-lg">
+          {filtered.length} requests
+        </div>
+      </div>
+
+      {/* Bottom Cards */}
+      <div className="absolute bottom-28 left-0 right-0 z-10 px-4 flex justify-center">
+        <div className="w-full max-w-4xl overflow-x-auto flex gap-4 no-scrollbar pb-4">
+          {filtered.length === 0 ? (
+            <div className="min-w-[280px] bg-white border-4 border-black rounded-[2rem] p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center gap-2">
+              <span className="text-4xl">🗺️</span>
+              <span className="font-black uppercase text-sm">No results found</span>
+            </div>
+          ) : filtered.map(req => (
             <motion.div
               key={req.id}
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate(`/request/${req.id}`)}
-              className="min-w-[300px] bg-white border-4 border-black rounded-[2rem] p-5 shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] flex gap-5 cursor-pointer"
+              className="min-w-[280px] bg-white border-4 border-black rounded-[2rem] p-4 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex gap-4 cursor-pointer hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transition-all"
             >
-              <div className="w-24 h-24 rounded-2xl overflow-hidden border-2 border-black shrink-0">
-                <img src={req.proofUrls[0]} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+              <div className="w-20 h-20 rounded-xl overflow-hidden border-2 border-black shrink-0">
+                <img
+                  src={req.proofUrls?.[0] || `https://ui-avatars.com/api/?name=${encodeURIComponent(req.title)}&background=fde047&color=000&bold=true&size=200`}
+                  className="w-full h-full object-cover"
+                  referrerPolicy="no-referrer"
+                  alt={req.title}
+                />
               </div>
-              <div className="flex-1 flex flex-col justify-between py-1">
+              <div className="flex-1 flex flex-col justify-between py-1 min-w-0">
                 <div>
                   <div className="flex justify-between items-start mb-1">
                     <span className="text-[8px] font-black uppercase text-gray-400 tracking-widest">{req.category}</span>
-                    <Badge className="bg-yellow-400 text-black border border-black text-[7px] px-1 py-0">{req.urgency}</Badge>
+                    <span className={`text-[7px] font-black uppercase px-1.5 py-0.5 rounded-full border border-current ${req.urgency === 'High' ? 'text-red-500 bg-red-50' : req.urgency === 'Medium' ? 'text-yellow-600 bg-yellow-50' : 'text-green-600 bg-green-50'}`}>{req.urgency}</span>
                   </div>
                   <div className="text-sm font-black italic tracking-tighter uppercase leading-tight line-clamp-2">{req.title}</div>
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-1 mt-1">
                   <div className="flex justify-between text-[8px] font-black uppercase">
-                    <span>Progress</span>
-                    <span>{Math.round((req.raisedAmount / req.targetAmount) * 100)}%</span>
+                    <span>₹{req.raisedAmount.toLocaleString()}</span>
+                    <span>{Math.round(Math.min((req.raisedAmount / req.targetAmount) * 100, 100))}%</span>
                   </div>
-                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden border border-black">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${(req.raisedAmount / req.targetAmount) * 100}%` }}
-                      className="h-full bg-yellow-400"
-                    />
+                  <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden border border-black">
+                    <div className="h-full bg-yellow-400" style={{ width: `${Math.min((req.raisedAmount / req.targetAmount) * 100, 100)}%` }} />
                   </div>
                 </div>
               </div>
@@ -2366,87 +2852,306 @@ const MapPage = () => {
   );
 };
 
+
+const AdminPage = () => {
+  const { user } = useAuth();
+  const { requests, adminDeleteRequest, adminOverrideStatus } = useData();
+  const navigate = useNavigate();
+
+  if (user?.role !== 'admin') {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4 p-8 text-center">
+        <Shield size={64} className="text-gray-200" />
+        <h2 className="text-3xl font-black uppercase italic">Access Denied</h2>
+        <p className="text-gray-500 font-bold">Only admins can view this page.</p>
+        <Button onClick={() => navigate('/')} className="bg-black text-white font-black uppercase h-12 px-8 rounded-2xl">Go Home</Button>
+      </div>
+    );
+  }
+
+  const flaggedRequests = requests.filter(r => (r.flagCount || 0) >= 1 || r.status === 'Flagged');
+  const [adminSearch, setAdminSearch] = useState('');
+  const totalRequests = requests.length;
+  const totalFlagged = flaggedRequests.length;
+  const totalVerified = requests.filter(r => r.status === 'Verified').length;
+  const filteredAdminRequests = adminSearch ? requests.filter(r =>
+    r.title.toLowerCase().includes(adminSearch.toLowerCase()) ||
+    r.requesterName.toLowerCase().includes(adminSearch.toLowerCase())
+  ) : requests;
+
+  return (
+    <div className="max-w-4xl mx-auto px-6 py-12 pb-32">
+      {/* Header */}
+      <div className="flex items-center gap-4 mb-8">
+        <div className="w-14 h-14 bg-black rounded-2xl flex items-center justify-center border-4 border-yellow-400 shadow-[4px_4px_0px_0px_rgba(253,224,71,1)]">
+          <Shield size={28} className="text-yellow-400" />
+        </div>
+        <div>
+          <h1 className="text-4xl font-black italic uppercase tracking-tighter">Admin Panel</h1>
+          <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest">AL ABABEEL Platform Control</p>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-4 mb-10">
+        {[
+          { label: 'Total Requests', value: totalRequests, color: 'bg-black text-white', shadow: 'shadow-[4px_4px_0px_0px_rgba(253,224,71,1)]' },
+          { label: 'Flagged', value: totalFlagged, color: 'bg-red-500 text-white', shadow: 'shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]' },
+          { label: 'Verified', value: totalVerified, color: 'bg-green-500 text-black', shadow: 'shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]' },
+        ].map(stat => (
+          <div key={stat.label} className={`p-5 rounded-[1.5rem] border-4 border-black ${stat.color} ${stat.shadow}`}>
+            <div className="text-[9px] font-black uppercase tracking-widest opacity-70 mb-1">{stat.label}</div>
+            <div className="text-4xl font-black italic">{stat.value}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* All Requests Table */}
+      <div className="flex items-center gap-3 mb-4">
+        <h2 className="text-2xl font-black italic uppercase tracking-tighter flex-1">All Requests</h2>
+        <div className="flex items-center gap-2 bg-white border-2 border-black rounded-xl h-10 px-4 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+          <Search size={14} className="text-gray-400" />
+          <input
+            value={adminSearch}
+            onChange={e => setAdminSearch(e.target.value)}
+            placeholder="Filter requests..."
+            className="bg-transparent outline-none font-bold text-sm w-32 placeholder:text-gray-300"
+          />
+          {adminSearch && <button onClick={() => setAdminSearch('')} className="text-gray-400 hover:text-black text-xs font-black">✕</button>}
+        </div>
+      </div>
+      <div className="space-y-4 mb-10">
+        {requests.length === 0 ? (
+          <div className="p-12 text-center bg-gray-50 rounded-[2rem] border-4 border-dashed border-black">
+            <BarChart3 size={48} className="mx-auto mb-3 text-gray-300" />
+            <p className="font-black uppercase text-gray-400">No requests yet</p>
+          </div>
+        ) : filteredAdminRequests.map(req => (
+          <div key={req.id} className={`p-5 bg-white border-4 rounded-[1.5rem] shadow-[4px_4px_0px_0px_rgba(0,0,0,0.05)] space-y-3 ${req.status === 'Flagged' || (req.flagCount || 0) >= 3 ? 'border-red-400' : 'border-black'
+            }`}>
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <Badge className={`text-[9px] font-black uppercase ${req.status === 'Flagged' ? 'bg-red-500 text-white' :
+                    req.status === 'Verified' ? 'bg-green-500 text-black' :
+                      'bg-gray-200 text-gray-600'
+                    }`}>{req.status}</Badge>
+                  {(req.flagCount || 0) > 0 && (
+                    <Badge className="text-[9px] bg-orange-100 text-orange-700 border border-orange-200 font-black">
+                      <Flag size={8} className="mr-1" />{req.flagCount} flags
+                    </Badge>
+                  )}
+                  {(req.validationCount || 0) > 0 && (
+                    <Badge className="text-[9px] bg-green-100 text-green-700 border border-green-200 font-black">
+                      <ThumbsUp size={8} className="mr-1" />{req.validationCount} valid
+                    </Badge>
+                  )}
+                </div>
+                <div className="font-black italic uppercase tracking-tight line-clamp-1">{req.title}</div>
+                <div className="text-[10px] font-bold text-gray-400 uppercase">{req.requesterName} · {req.category}</div>
+              </div>
+              <div className="flex gap-2 shrink-0">
+                <button
+                  onClick={() => adminOverrideStatus(req.id, 'Verified')}
+                  title="Clear Flag & Mark Verified"
+                  className="w-9 h-9 bg-green-100 text-green-700 border-2 border-green-300 rounded-xl flex items-center justify-center hover:bg-green-200 transition-colors"
+                >
+                  <CheckCircle size={16} />
+                </button>
+                <button
+                  onClick={() => adminDeleteRequest(req.id)}
+                  title="Delete Request"
+                  className="w-9 h-9 bg-red-100 text-red-700 border-2 border-red-300 rounded-xl flex items-center justify-center hover:bg-red-200 transition-colors"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Flagged Only Section */}
+      {flaggedRequests.length > 0 && (
+        <>
+          <h2 className="text-2xl font-black italic uppercase tracking-tighter mb-4 text-red-600">🚩 Flagged Requests</h2>
+          <div className="space-y-4">
+            {flaggedRequests.map(req => (
+              <div key={req.id + '_flagged'} className="p-5 bg-red-50 border-4 border-red-400 rounded-[1.5rem] flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="font-black italic uppercase tracking-tight line-clamp-1">{req.title}</div>
+                  <div className="text-[10px] font-bold text-red-500 uppercase">{req.flagCount} flags · {req.requesterName}</div>
+                </div>
+                <div className="flex gap-2 shrink-0">
+                  <button onClick={() => adminOverrideStatus(req.id, 'Verified')} className="px-3 py-2 bg-green-500 text-black border-2 border-black rounded-xl font-black text-[10px] uppercase">
+                    Clear
+                  </button>
+                  <button onClick={() => adminDeleteRequest(req.id)} className="px-3 py-2 bg-red-500 text-white border-2 border-red-700 rounded-xl font-black text-[10px] uppercase">
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
+
 const ProfilePage = () => {
   const { user, logout } = useAuth();
-  const { donations, requests } = useData();
+  const { donations, requests, fulfillments } = useData();
+  const [upiId, setUpiId] = useState(user?.upiId || localStorage.getItem('aidconnect_upi') || '');
+  const [upiSaved, setUpiSaved] = useState(false);
 
   const myDonations = donations.filter(d => d.donorId === user?.uid);
   const totalDonated = myDonations.reduce((acc, d) => acc + d.amount, 0);
   const myRequests = requests.filter(r => r.requesterId === user?.uid);
+  const myFulfillments = (fulfillments || []).filter(f => f.userId === user?.uid);
+  const myValidations = requests.filter(r => (r.validatedBy || []).includes(user?.uid || '')).length;
+
+  const trustScore = Math.min(100, myValidations * 5 + myFulfillments.length * 10 + myDonations.length * 3 + myRequests.length * 2);
+  const trustColor = trustScore >= 70 ? 'bg-green-500' : trustScore >= 40 ? 'bg-yellow-400' : 'bg-red-400';
+  const trustLabel = trustScore >= 70 ? 'Trusted' : trustScore >= 40 ? 'Growing' : 'New';
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-12 pb-32">
-      <div className="flex flex-col items-center text-center mb-12">
-        <div className="relative mb-6">
-          <Avatar className="w-32 h-32 border-4 border-black shadow-[8px_8px_0px_0px_rgba(253,224,71,1)] rotate-3">
+    <div className="max-w-4xl mx-auto px-6 py-10 pb-32">
+      {/* Hero */}
+      <div className="flex flex-col items-center text-center mb-10">
+        <div className="relative mb-4">
+          <Avatar className="w-28 h-28 border-4 border-black shadow-[8px_8px_0px_0px_rgba(253,224,71,1)] rotate-2">
             <AvatarImage src={user?.photoURL} />
-            <AvatarFallback>{user?.displayName[0]}</AvatarFallback>
+            <AvatarFallback className="text-3xl font-black">{user?.displayName?.[0] || 'U'}</AvatarFallback>
           </Avatar>
-          <div className="absolute -bottom-2 -right-2 bg-black text-yellow-400 px-3 py-1 rounded-full font-black text-xs border-2 border-white">
-            {user?.role?.toUpperCase()}
+          <div className={`absolute -bottom-2 -right-2 px-3 py-1 rounded-full font-black text-[10px] border-2 border-white uppercase ${user?.role === 'admin' ? 'bg-yellow-400 text-black' : 'bg-black text-yellow-400'}`}>
+            {user?.role?.toUpperCase() || 'USER'}
           </div>
         </div>
         <h2 className="text-4xl font-black italic tracking-tighter uppercase">{user?.displayName}</h2>
-        <p className="text-gray-500 font-bold mt-1">{user?.email}</p>
+        <p className="text-gray-500 font-bold mt-1 text-sm">{user?.email}</p>
+
+        {/* Trust Score */}
+        <div className="mt-5 w-full max-w-xs">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Trust Score</span>
+            <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${trustScore >= 70 ? 'bg-green-100 text-green-700' : trustScore >= 40 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-600'}`}>{trustLabel}</span>
+          </div>
+          <div className="h-3 bg-gray-100 rounded-full overflow-hidden border-2 border-black">
+            <motion.div initial={{ width: 0 }} animate={{ width: `${trustScore}%` }} transition={{ duration: 1, ease: 'easeOut' }} className={`h-full ${trustColor}`} />
+          </div>
+          <p className="text-right text-[10px] font-black text-gray-400 mt-1">{trustScore}/100</p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-        <Card className="bg-black text-white border-none shadow-[4px_4px_0px_0px_rgba(253,224,71,1)]">
-          <div className="text-[10px] font-black uppercase text-yellow-400 tracking-widest mb-1">Total Impact</div>
-          <div className="text-3xl font-black italic tracking-tighter">₹{totalDonated.toLocaleString()}</div>
-        </Card>
-        <Card className="bg-yellow-400 text-black border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-          <div className="text-[10px] font-black uppercase text-black/50 tracking-widest mb-1">Your Location</div>
-          <div className="text-xl mt-1 font-black italic tracking-tighter uppercase line-clamp-1">{user?.location?.address || 'India'}</div>
-        </Card>
+      {/* Stats Dashboard */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+        {[
+          { label: 'Total Donated', value: `₹${totalDonated.toLocaleString()}`, bg: 'bg-black text-white', shadow: 'shadow-[4px_4px_0px_0px_rgba(253,224,71,1)]', icon: <Wallet size={18} className="text-yellow-400" /> },
+          { label: 'Fulfillments', value: myFulfillments.length, bg: 'bg-green-500 text-black border-2 border-black', shadow: 'shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]', icon: <Gift size={18} className="text-black" /> },
+          { label: 'My Requests', value: myRequests.length, bg: 'bg-yellow-400 text-black border-2 border-black', shadow: 'shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]', icon: <FileText size={18} className="text-black" /> },
+          { label: 'Validations', value: myValidations, bg: 'bg-white text-black border-4 border-black', shadow: 'shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]', icon: <ThumbsUp size={18} className="text-blue-600" /> },
+        ].map(stat => (
+          <div key={stat.label} className={`p-5 rounded-[1.5rem] ${stat.bg} ${stat.shadow} flex flex-col gap-2`}>
+            {stat.icon}
+            <div className="text-3xl font-black italic leading-none">{stat.value}</div>
+            <div className="text-[9px] font-black uppercase tracking-widest opacity-70">{stat.label}</div>
+          </div>
+        ))}
       </div>
 
-      <div className="space-y-6">
+      {/* UPI ID Editor */}
+      <div className="p-6 bg-white border-4 border-black rounded-[2rem] shadow-[6px_6px_0px_0px_rgba(0,0,0,0.05)] mb-8">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 bg-yellow-100 rounded-xl border-2 border-black flex items-center justify-center"><Wallet size={18} className="text-yellow-600" /></div>
+          <div>
+            <h4 className="font-black uppercase text-sm tracking-tight">Your UPI ID</h4>
+            <p className="text-[10px] font-bold text-gray-400 uppercase">Used when others donate to your requests</p>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Input value={upiId} onChange={e => setUpiId(e.target.value)} placeholder="e.g. yourname@okaxis" className="flex-1 h-12 border-2 border-black rounded-xl font-bold" />
+          <Button onClick={() => { localStorage.setItem('aidconnect_upi', upiId); setUpiSaved(true); setTimeout(() => setUpiSaved(false), 2000); }} className={`h-12 px-4 border-2 border-black font-black text-xs uppercase rounded-xl shrink-0 ${upiSaved ? 'bg-green-500 text-black' : 'bg-black text-white'}`}>
+            {upiSaved ? <><Check size={14} className="mr-1" />Saved</> : 'Save'}
+          </Button>
+        </div>
+      </div>
+
+      {/* Activity History */}
+      <div className="space-y-4">
         <h3 className="text-2xl font-black italic uppercase tracking-tight">Activity History</h3>
 
-        {user?.role === 'donor' ? (
-          <div className="space-y-4">
+        {myDonations.length > 0 && (
+          <div className="space-y-2">
+            <div className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Donations</div>
             {myDonations.map(don => (
               <div key={don.id} className="flex items-center justify-between p-4 bg-white border-2 border-black rounded-2xl">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gray-100 rounded-xl border-2 border-black flex items-center justify-center"><History size={20} /></div>
+                  <div className="w-9 h-9 bg-green-100 rounded-xl border-2 border-black flex items-center justify-center"><Wallet size={16} className="text-green-600" /></div>
                   <div>
-                    <div className="font-black text-sm uppercase">Donated to Request</div>
-                    <div className="text-[10px] font-bold text-gray-400 uppercase">{new Date(don.timestamp).toLocaleDateString()}</div>
+                    <div className="font-black text-sm uppercase">Donated</div>
+                    <div className="text-[10px] font-bold text-gray-400">{new Date(don.timestamp).toLocaleDateString()}</div>
                   </div>
                 </div>
-                <div className="text-lg font-black italic tracking-tighter text-green-600">+₹{don.amount}</div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {myRequests.map(req => (
-              <div key={req.id} className="flex items-center justify-between p-4 bg-white border-2 border-black rounded-2xl">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gray-100 rounded-xl border-2 border-black flex items-center justify-center"><TrendingUp size={20} /></div>
-                  <div>
-                    <div className="font-black text-sm uppercase line-clamp-1">{req.title}</div>
-                    <div className="text-[10px] font-bold text-gray-400 uppercase">{req.status}</div>
-                  </div>
-                </div>
-                <div className="text-lg font-black italic tracking-tighter">₹{req.raisedAmount}</div>
+                <div className="font-black italic text-green-600">+₹{don.amount}</div>
               </div>
             ))}
           </div>
         )}
 
-        <Button
-          onClick={logout}
-          variant="outline"
-          className="w-full h-14 border-2 border-red-500 text-red-500 hover:bg-red-50 mt-8"
-        >
-          Logout Session <LogOut size={20} className="ml-2" />
+        {myFulfillments.length > 0 && (
+          <div className="space-y-2">
+            <div className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Fulfillments</div>
+            {myFulfillments.map(ful => (
+              <div key={ful.id} className="flex items-center justify-between p-4 bg-white border-2 border-black rounded-2xl">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 bg-blue-100 rounded-xl border-2 border-black flex items-center justify-center"><Gift size={16} className="text-blue-600" /></div>
+                  <div>
+                    <div className="font-black text-sm uppercase">{ful.quantity}× {ful.itemName}</div>
+                    <div className="text-[10px] font-bold text-gray-400">{new Date(ful.timestamp).toLocaleDateString()}</div>
+                  </div>
+                </div>
+                <Badge className="bg-blue-100 text-blue-700 border border-blue-200 font-black text-[9px] uppercase">{ful.method}</Badge>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {myRequests.length > 0 && (
+          <div className="space-y-2">
+            <div className="text-[10px] font-black uppercase text-gray-400 tracking-widest">My Requests</div>
+            {myRequests.map(req => (
+              <div key={req.id} className="flex items-center justify-between p-4 bg-white border-2 border-black rounded-2xl">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 bg-yellow-100 rounded-xl border-2 border-black flex items-center justify-center"><FileText size={16} className="text-yellow-600" /></div>
+                  <div>
+                    <div className="font-black text-sm uppercase line-clamp-1">{req.title}</div>
+                    <div className="text-[10px] font-bold text-gray-400 uppercase">{req.status}</div>
+                  </div>
+                </div>
+                <div className="font-black italic">₹{req.raisedAmount}</div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {myDonations.length === 0 && myFulfillments.length === 0 && myRequests.length === 0 && (
+          <div className="p-10 text-center bg-gray-50 rounded-[2rem] border-4 border-dashed border-black">
+            <Heart size={40} className="mx-auto mb-3 text-gray-200" />
+            <p className="font-black uppercase text-gray-400 text-sm">No activity yet</p>
+          </div>
+        )}
+
+        <Button onClick={logout} variant="outline" className="w-full h-14 border-2 border-red-500 text-red-500 hover:bg-red-50 font-black uppercase tracking-widest mt-4">
+          Logout <LogOut size={18} className="ml-2" />
         </Button>
       </div>
     </div>
   );
 };
+
+
 
 // --- Providers ---
 
@@ -2515,6 +3220,14 @@ const AppContent = () => {
                 <Route path="/verify/:id" element={<VerificationPage />} />
                 <Route path="/map" element={<MapPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/admin" element={<AdminPage />} />
+                <Route path="*" element={
+                  <div className="flex flex-col items-center justify-center min-h-screen gap-4 p-8 text-center">
+                    <div className="text-8xl">404</div>
+                    <h2 className="text-3xl font-black uppercase italic">Page Not Found</h2>
+                    <Button onClick={() => navigate('/')} className="bg-black text-white font-black uppercase h-12 px-8 rounded-2xl">Go Home</Button>
+                  </div>
+                } />
               </Routes>
             </motion.div>
           </AnimatePresence>
@@ -2547,16 +3260,27 @@ const AppContent = () => {
 
                 <Link to="/profile" className={`flex flex-col items-center gap-1.5 transition-all ${location.pathname === '/profile' ? 'text-black scale-110' : 'text-gray-300'}`}>
                   <div className={`p-2 rounded-xl ${location.pathname === '/profile' ? 'bg-green-500 border-2 border-black' : ''}`}>
-                    <User size={22} />
+                    {user?.photoURL ? (
+                      <img src={user.photoURL} alt="profile" className="w-6 h-6 rounded-full border-2 border-black object-cover" />
+                    ) : (
+                      <User size={22} />
+                    )}
                   </div>
                   <span className="text-[8px] font-black uppercase tracking-[0.2em]">Profile</span>
                 </Link>
-                <button className="flex flex-col items-center gap-1.5 text-gray-300 hover:text-red-500 transition-colors">
-                  <div className="p-2 rounded-xl">
-                    <ShieldAlert size={22} />
-                  </div>
-                  <span className="text-[8px] font-black uppercase tracking-[0.2em]">Report</span>
-                </button>
+                {user?.role === 'admin' ? (
+                  <Link to="/admin" className={`flex flex-col items-center gap-1.5 transition-all ${location.pathname === '/admin' ? 'text-black scale-110' : 'text-gray-300'}`}>
+                    <div className={`p-2 rounded-xl ${location.pathname === '/admin' ? 'bg-yellow-400 border-2 border-black' : ''}`}>
+                      <Shield size={22} />
+                    </div>
+                    <span className="text-[8px] font-black uppercase tracking-[0.2em]">Admin</span>
+                  </Link>
+                ) : (
+                  <button className="flex flex-col items-center gap-1.5 text-gray-300 hover:text-black transition-colors" onClick={() => navigate('/create-request')}>
+                    <div className="p-2 rounded-xl"><ShieldAlert size={22} /></div>
+                    <span className="text-[8px] font-black uppercase tracking-[0.2em]">Report</span>
+                  </button>
+                )}
               </nav>
             </div>
           )}
