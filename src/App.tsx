@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, createContext, useContext } from 'react';
+import React, { useState, useEffect, createContext, useContext } from 'react';
 import {
   BrowserRouter as Router,
   Routes,
@@ -82,36 +82,36 @@ const Particle = ({ x, y }: ParticleProps) => (
 const SuccessAnimation = ({ category, amount }: { category: RequestCategory, amount: number }) => {
   const configs: Record<string, { emoji: string; items: string[]; label: string; bg: string; accent: string }> = {
     Food: {
-      emoji: 'ðŸ½ï¸',
-      items: ['ðŸž', 'ðŸ¥›', 'ðŸš', 'ðŸ¥—', 'ðŸ¥©', 'ðŸŽ', 'ðŸ¥¦', 'ðŸ‹'],
+      emoji: '�Y��️',
+      items: ['�Y�z', '�Y�>', '�Y�s', '�Y�-', '�Y��', '�Y�Z', '�Y��', '�Y�<'],
       label: `${Math.max(1, Math.floor(amount / 50))} meals provided`,
       bg: 'bg-orange-50',
       accent: 'text-orange-500',
     },
     Medical: {
-      emoji: 'ðŸ¥',
-      items: ['ðŸ’Š', 'ðŸ©º', 'ðŸ©¹', 'ðŸ’‰', 'ðŸ§ª', 'ðŸ©»'],
+      emoji: '�Y��',
+      items: ['�Y'S', '�Y��', '�Y��', '�Y'?', '�Y��', '�Y��'],
       label: `${Math.max(1, Math.floor(amount / 100))} kits funded`,
       bg: 'bg-red-50',
       accent: 'text-red-500',
     },
     Education: {
-      emoji: 'ðŸŽ’',
-      items: ['ðŸ“š', 'âœï¸', 'ðŸ“', 'ðŸ“’', 'ðŸ–Šï¸', 'ðŸ“'],
+      emoji: '�YZ'',
+      items: ['�Y"s', '�o�️', '�Y"�', '�Y"'', '�Y-S️', '�Y"�'],
       label: `${Math.max(1, Math.floor(amount / 80))} kits provided`,
       bg: 'bg-blue-50',
       accent: 'text-blue-500',
     },
     Emergency: {
-      emoji: 'ðŸ›¡ï¸',
-      items: ['â¤ï¸', 'ðŸ¤', 'âœŠ', 'ðŸ’ª', 'ðŸŒŸ', 'ðŸ™'],
+      emoji: '�Y>�️',
+      items: ['❤️', '�Y��', '�oS', '�Y'�', '�YOY', '�YT�'],
       label: `Emergency support sent`,
       bg: 'bg-yellow-50',
       accent: 'text-yellow-600',
     },
     Clothing: {
-      emoji: 'ðŸ‘•',
-      items: ['ðŸ‘š', 'ðŸ‘—', 'ðŸ§£', 'ðŸ§¥', 'ðŸ‘Ÿ', 'ðŸ§¤'],
+      emoji: '�Y'.',
+      items: ['�Y's', '�Y'-', '�Y��', '�Y��', '�Y'Y', '�Y��'],
       label: `${Math.max(1, Math.floor(amount / 60))} sets funded`,
       bg: 'bg-purple-50',
       accent: 'text-purple-500',
@@ -179,7 +179,7 @@ const SuccessAnimation = ({ category, amount }: { category: RequestCategory, amo
 
 // Confetti particle for PaymentSuccessOverlay
 const ConfettiParticle = ({ delay }: { delay: number }) => {
-  const emojis = ['ðŸŽ‰', 'â­', 'âœ¨', 'ðŸ’›', 'ðŸŒŸ', 'ðŸŽŠ'];
+  const emojis = ['�YZ?', '⭐', '�o�', '�Y'>', '�YOY', '�YZS'];
   const emoji = emojis[Math.floor(delay * emojis.length * 7) % emojis.length];
   const left = ((delay * 137.5) % 100);
   return (
@@ -223,7 +223,7 @@ const PaymentSuccessOverlay = ({ category, amount, onClose }: { category: Reques
 
       <div className="space-y-1">
         <h2 className="text-5xl font-black italic tracking-tighter uppercase leading-none">Impact Created!</h2>
-        <p className="text-black font-bold uppercase tracking-widest text-sm">You just donated â‚¹{amount}</p>
+        <p className="text-black font-bold uppercase tracking-widest text-sm">You just donated �,�{amount}</p>
       </div>
 
       <SuccessAnimation category={category} amount={amount} />
@@ -235,19 +235,19 @@ const PaymentSuccessOverlay = ({ category, amount, onClose }: { category: Reques
         className="bg-black text-white p-5 rounded-3xl border-4 border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,0.2)]"
       >
         <p className="font-black italic text-lg mb-1">
-          {category === 'Food' ? 'ðŸ½ï¸ A plate is being filled right now!' :
-            category === 'Medical' ? 'ðŸ’Š Medicine is on its way!' :
-              category === 'Education' ? 'ðŸ“š A student\'s future is brighter!' :
-                'ðŸ›¡ï¸ Emergency support is dispatched!'}
+          {category === 'Food' ? '�Y��️ A plate is being filled right now!' :
+            category === 'Medical' ? '�Y'S Medicine is on its way!' :
+              category === 'Education' ? '�Y"s A student\'s future is brighter!' :
+                '�Y>�️ Emergency support is dispatched!'}
         </p>
-        <p className="text-[10px] font-black uppercase text-yellow-400 tracking-widest">Transaction Verified Â· Blockchain Secured</p>
+        <p className="text-[10px] font-black uppercase text-yellow-400 tracking-widest">Transaction Verified · Blockchain Secured</p>
       </motion.div>
 
       <Button
         onClick={onClose}
         className="w-full h-16 bg-white text-black border-4 border-black font-black uppercase tracking-widest text-xl rounded-2xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
       >
-        Continue Helping ðŸŒ
+        Continue Helping �YO�
       </Button>
     </motion.div>
   </motion.div>
@@ -271,10 +271,10 @@ const VisualDonation = ({ amount, target, category }: { amount: number, target: 
 
   const getLabel = () => {
     switch (category) {
-      case 'Food': return `â‚¹200 = 1 Meal Plate`;
-      case 'Medical': return `â‚¹500 = 1 Medicine Kit`;
-      case 'Education': return `â‚¹100 = 1 Stationery Set`;
-      default: return `â‚¹100 = 1 Impact Unit`;
+      case 'Food': return `�,�200 = 1 Meal Plate`;
+      case 'Medical': return `�,�500 = 1 Medicine Kit`;
+      case 'Education': return `�,�100 = 1 Stationery Set`;
+      default: return `�,�100 = 1 Impact Unit`;
     }
   };
 
@@ -294,7 +294,7 @@ const VisualDonation = ({ amount, target, category }: { amount: number, target: 
           {getIcon()}
           <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">{getLabel()}</span>
         </div>
-        <span className="text-2xl font-black italic tracking-tighter">â‚¹{safeAmount.toLocaleString()} <span className="text-sm text-gray-400 font-normal">/ â‚¹{safeTarget.toLocaleString()}</span></span>
+        <span className="text-2xl font-black italic tracking-tighter">�,�{safeAmount.toLocaleString()} <span className="text-sm text-gray-400 font-normal">/ �,�{safeTarget.toLocaleString()}</span></span>
       </div>
       <div className="relative h-4 bg-gray-100 rounded-full overflow-hidden border-2 border-black">
         <motion.div
@@ -339,7 +339,7 @@ const UPIDonationModal: React.FC<{
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) { onClose(); setNotInstalled(false); } }}>
       <DialogContent className="border-4 border-black rounded-[2rem] p-8 max-w-sm">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-black italic uppercase tracking-tighter">Pay â‚¹{amount} via UPI</DialogTitle>
+          <DialogTitle className="text-2xl font-black italic uppercase tracking-tighter">Pay �,�{amount} via UPI</DialogTitle>
           <DialogDescription className="font-bold text-gray-600">
             Use Google Pay, PhonePe, Paytm or any UPI app.
           </DialogDescription>
@@ -348,9 +348,9 @@ const UPIDonationModal: React.FC<{
           {/* UPI Deep Link Buttons */}
           <div className="grid grid-cols-3 gap-3">
             {[
-              { name: 'Google Pay', scheme: `gpay://upi/pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(title)}&am=${amount}&cu=INR`, color: 'bg-blue-50 border-blue-200', emoji: 'ðŸŸ¢' },
-              { name: 'PhonePe', scheme: `phonepe://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(title)}&am=${amount}&cu=INR`, color: 'bg-purple-50 border-purple-200', emoji: 'ðŸŸ£' },
-              { name: 'Paytm', scheme: `paytmmp://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(title)}&am=${amount}&cu=INR`, color: 'bg-sky-50 border-sky-200', emoji: 'ðŸ”µ' },
+              { name: 'Google Pay', scheme: `gpay://upi/pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(title)}&am=${amount}&cu=INR`, color: 'bg-blue-50 border-blue-200', emoji: '�YY�' },
+              { name: 'PhonePe', scheme: `phonepe://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(title)}&am=${amount}&cu=INR`, color: 'bg-purple-50 border-purple-200', emoji: '�YY�' },
+              { name: 'Paytm', scheme: `paytmmp://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(title)}&am=${amount}&cu=INR`, color: 'bg-sky-50 border-sky-200', emoji: '�Y"�' },
             ].map(app => (
               <button
                 key={app.name}
@@ -378,7 +378,7 @@ const UPIDonationModal: React.FC<{
           {/* Fallback: copy UPI ID */}
           {notInstalled && (
             <div className="p-4 bg-yellow-50 border-2 border-yellow-400 border-dashed rounded-2xl space-y-3">
-              <p className="text-xs font-black uppercase text-yellow-700">âš ï¸ App not detected? Copy UPI ID manually:</p>
+              <p className="text-xs font-black uppercase text-yellow-700">�s�️ App not detected? Copy UPI ID manually:</p>
               <div className="flex items-center gap-2 bg-white border-2 border-black rounded-xl p-3">
                 <span className="flex-1 font-black text-sm truncate">{upiId}</span>
                 <Button size="sm" variant="outline" onClick={handleCopy} className="border-2 border-black h-8 font-black text-xs shrink-0">
@@ -769,7 +769,7 @@ const AuthPage = () => {
                         <label className="text-xs font-bold text-gray-500">Create a Password <span className="text-red-500">*</span></label>
                         <Input
                           type="password"
-                          placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                          placeholder="�?��?��?��?��?��?��?��?�"
                           className="h-14 rounded-xl border-gray-200 bg-gray-50 focus:bg-white transition-all font-bold"
                           value={formData.password}
                           onChange={e => setFormData({ ...formData, password: e.target.value })}
@@ -1223,7 +1223,7 @@ const HomePage = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-black truncate">{don.donorName}</div>
-                <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest truncate">donated <span className="text-green-600 font-black italic text-sm">â‚¹{don.amount}</span></div>
+                <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest truncate">donated <span className="text-green-600 font-black italic text-sm">�,�{don.amount}</span></div>
               </div>
             </motion.div>
           ))}
@@ -1234,9 +1234,9 @@ const HomePage = () => {
       <motion.div variants={itemVariants} className="px-6 mt-10">
         <div className="grid grid-cols-3 gap-3">
           {[
-            { label: 'Total Raised', value: `â‚¹${requests.reduce((s, r) => s + r.raisedAmount, 0).toLocaleString()}`, emoji: 'ðŸ’°' },
-            { label: 'Requests', value: requests.length, emoji: 'ðŸ“‹' },
-            { label: 'Donors', value: donations.length, emoji: 'ðŸ¤' },
+            { label: 'Total Raised', value: `�,�${requests.reduce((s, r) => s + r.raisedAmount, 0).toLocaleString()}`, emoji: '�Y'�' },
+            { label: 'Requests', value: requests.length, emoji: '�Y"<' },
+            { label: 'Donors', value: donations.length, emoji: '�Y��' },
           ].map(stat => (
             <div key={stat.label} className="bg-white border-2 border-black rounded-2xl p-3 text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
               <div className="text-xl mb-1">{stat.emoji}</div>
@@ -1257,7 +1257,7 @@ const HomePage = () => {
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
-          {search && <button onClick={() => setSearch('')} className="text-gray-400 hover:text-black transition-colors text-sm font-black">âœ•</button>}
+          {search && <button onClick={() => setSearch('')} className="text-gray-400 hover:text-black transition-colors text-sm font-black">�o.</button>}
         </div>
       </motion.div>
 
@@ -1296,14 +1296,14 @@ const HomePage = () => {
             onClick={() => navigate('/map')}
             className="text-[10px] font-black uppercase text-blue-500 border-b-2 border-blue-500/20 pb-1 tracking-widest"
           >
-            View Map â†’
+            View Map �?'
           </motion.button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
           {filteredRequests.length === 0 ? (
             <div className="col-span-full flex flex-col items-center justify-center py-20 gap-4">
-              <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 3, repeat: Infinity }} className="text-6xl">ðŸ”</motion.div>
+              <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 3, repeat: Infinity }} className="text-6xl">�Y"�</motion.div>
               <h4 className="text-2xl font-black italic uppercase">No requests found</h4>
               <p className="text-gray-400 font-bold text-sm uppercase tracking-widest">{search ? 'Try a different search term' : 'Be the first to create a request!'}</p>
               {search && <button onClick={() => setSearch('')} className="text-[10px] font-black uppercase text-blue-500 border-b border-blue-500/20">Clear Search</button>}
@@ -1461,7 +1461,7 @@ const RequestDetailPage = () => {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-500 uppercase">Target Amount (â‚¹)</label>
+                <label className="text-xs font-bold text-gray-500 uppercase">Target Amount (�,�)</label>
                 <Input type="number" value={editTarget} onChange={e => setEditTarget(e.target.value)} className="h-12 border-2 border-black rounded-xl font-bold" />
               </div>
               <div className="space-y-1">
@@ -1471,9 +1471,9 @@ const RequestDetailPage = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="High">ðŸ”´ High</SelectItem>
-                    <SelectItem value="Medium">ðŸŸ¡ Medium</SelectItem>
-                    <SelectItem value="Low">ðŸŸ¢ Low</SelectItem>
+                    <SelectItem value="High">�Y"� High</SelectItem>
+                    <SelectItem value="Medium">�YY� Medium</SelectItem>
+                    <SelectItem value="Low">�YY� Low</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -1565,7 +1565,7 @@ const RequestDetailPage = () => {
                   onClick={() => setReviewRating(star)}
                   className={`text-3xl transition-transform hover:scale-125 ${star <= reviewRating ? 'text-yellow-400' : 'text-gray-200'}`}
                 >
-                  â˜…
+                  �~.
                 </button>
               ))}
             </div>
@@ -1716,14 +1716,14 @@ const RequestDetailPage = () => {
             </div>
             <div>
               <h4 className="text-xl font-black italic uppercase tracking-tight">Monetary Support</h4>
-              <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Help reach the target of â‚¹{(request.targetAmount || 0).toLocaleString()}</p>
+              <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Help reach the target of �,�{(request.targetAmount || 0).toLocaleString()}</p>
             </div>
           </div>
 
           <div className="space-y-6">
             <div className="flex gap-4">
               <div className="flex-1 relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-lg">â‚¹</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-lg">�,�</span>
                 <Input
                   type="number"
                   value={donationAmount}
@@ -1747,7 +1747,7 @@ const RequestDetailPage = () => {
                   onClick={() => setDonationAmount(amt)}
                   className={`flex-1 py-2 border-2 border-black rounded-xl font-black text-xs transition-all ${donationAmount === amt ? 'bg-black text-white' : 'bg-gray-50 hover:bg-gray-100'}`}
                 >
-                  â‚¹{amt}
+                  �,�{amt}
                 </button>
               ))}
             </div>
@@ -1827,7 +1827,7 @@ const RequestDetailPage = () => {
                         <div className="text-[10px] font-bold text-gray-400 uppercase">{new Date(don.timestamp).toLocaleTimeString()}</div>
                       </div>
                     </div>
-                    <div className="text-lg font-black italic tracking-tighter">â‚¹{don.amount}</div>
+                    <div className="text-lg font-black italic tracking-tighter">�,�{don.amount}</div>
                   </div>
                 ))}
               </div>
@@ -1892,7 +1892,7 @@ const RequestDetailPage = () => {
                         </div>
                         <div className="flex text-yellow-400 text-xs">
                           {Array.from({ length: 5 }).map((_, i) => (
-                            <span key={i}>{i < rev.rating ? 'â˜…' : 'â˜†'}</span>
+                            <span key={i}>{i < rev.rating ? '�~.' : '�~?'}</span>
                           ))}
                         </div>
                       </div>
@@ -1936,7 +1936,7 @@ const RequestDetailPage = () => {
                     onClick={() => setDonationAmount(amt)}
                     className={`flex-1 h-12 md:h-14 border-2 border-black rounded-xl md:rounded-2xl font-black text-xs md:text-base transition-all ${donationAmount === amt ? 'bg-black text-white shadow-[3px_3px_0px_0px_rgba(253,224,71,1)]' : 'bg-white text-black hover:bg-gray-50'}`}
                   >
-                    â‚¹{amt}
+                    �,�{amt}
                   </button>
                 ))}
               </div>
@@ -2046,7 +2046,7 @@ const FulfillNeedPage = () => {
                   <div className="min-w-0 flex-1">
                     <CardTitle className="text-lg md:text-xl font-black italic uppercase truncate">{vendor.name}</CardTitle>
                     <div className="flex items-center gap-2 mt-1">
-                      <Badge className="bg-yellow-400 text-black text-[8px] font-black">â˜… {vendor.rating}</Badge>
+                      <Badge className="bg-yellow-400 text-black text-[8px] font-black">�~. {vendor.rating}</Badge>
                       <span className="text-[10px] font-bold text-gray-400 uppercase truncate">{vendor.distance} away</span>
                     </div>
                   </div>
@@ -2058,7 +2058,7 @@ const FulfillNeedPage = () => {
                   {vendor.items.map((item: any, i: number) => (
                     <div key={i} className="flex justify-between items-center p-3 bg-gray-50 rounded-xl border-2 border-black border-dashed">
                       <span className="font-bold text-sm truncate mr-2">{item.name}</span>
-                      <span className="font-black shrink-0">â‚¹{item.price}</span>
+                      <span className="font-black shrink-0">�,�{item.price}</span>
                     </div>
                   ))}
                 </div>
@@ -2096,13 +2096,13 @@ const FulfillNeedPage = () => {
             {selectedVendor.items.map((item: any, i: number) => (
               <div key={i} className="flex justify-between items-center">
                 <span className="font-bold truncate mr-4">{item.name}</span>
-                <span className="font-black shrink-0">â‚¹{item.price}</span>
+                <span className="font-black shrink-0">�,�{item.price}</span>
               </div>
             ))}
           </div>
           <div className="pt-4 border-t-2 border-black flex justify-between items-center">
             <span className="text-xl font-black italic uppercase">Total</span>
-            <span className="text-2xl font-black italic">â‚¹{selectedVendor.items.reduce((acc: number, item: any) => acc + item.price, 0)}</span>
+            <span className="text-2xl font-black italic">�,�{selectedVendor.items.reduce((acc: number, item: any) => acc + item.price, 0)}</span>
           </div>
         </div>
         <div className="p-8 bg-yellow-50 border-t-4 border-black space-y-4">
@@ -2266,7 +2266,7 @@ const CreateRequestPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  // Real GPS coords state â€” this is what gets saved to Appwrite
+  // Real GPS coords state �?" this is what gets saved to Appwrite
   const [locationCoords, setLocationCoords] = useState<{ lat: number; lng: number } | null>(null);
 
   const [formData, setFormData] = useState({
@@ -2353,7 +2353,7 @@ const CreateRequestPage = () => {
     }
     if (s === 2) {
       if (!formData.description.trim()) errs.description = 'Description is required.';
-      if (!formData.targetAmount || parseInt(formData.targetAmount) < 100) errs.targetAmount = 'Enter a valid target amount (min â‚¹100).';
+      if (!formData.targetAmount || parseInt(formData.targetAmount) < 100) errs.targetAmount = 'Enter a valid target amount (min �,�100).';
     }
     if (s === 3) {
       if (!formData.location.trim()) errs.location = 'Location is required.';
@@ -2427,7 +2427,7 @@ const CreateRequestPage = () => {
           <div className="mb-4 flex items-center gap-3 p-4 bg-green-50 border-2 border-green-400 rounded-2xl">
             <CheckCircle size={20} className="text-green-600 shrink-0" />
             <div className="flex-1 min-w-0">
-              <span className="text-sm font-black text-green-700 uppercase tracking-widest">ðŸ“ Location Detected</span>
+              <span className="text-sm font-black text-green-700 uppercase tracking-widest">�Y"� Location Detected</span>
               <p className="text-[10px] text-green-600 font-bold mt-0.5 truncate">{formData.location}</p>
             </div>
           </div>
@@ -2435,7 +2435,7 @@ const CreateRequestPage = () => {
         {gpsStatus === 'denied' && (
           <div className="mb-4 flex items-center gap-3 p-4 bg-yellow-50 border-2 border-yellow-400 rounded-2xl">
             <AlertCircle size={20} className="text-yellow-600 shrink-0" />
-            <span className="text-sm font-black text-yellow-700">GPS denied â€” type your location manually below</span>
+            <span className="text-sm font-black text-yellow-700">GPS denied �?" type your location manually below</span>
           </div>
         )}
 
@@ -2551,10 +2551,10 @@ const CreateRequestPage = () => {
                 </div>
                 <div className="space-y-3">
                   <label className="text-xs font-black uppercase text-gray-400 tracking-widest flex items-center gap-2">
-                    <TrendingUp size={14} /> Target Amount (â‚¹) <span className="text-red-500">*</span>
+                    <TrendingUp size={14} /> Target Amount (�,�) <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-xl text-gray-400">â‚¹</span>
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-xl text-gray-400">�,�</span>
                     <Input
                       type="number"
                       className={`border-2 rounded-2xl font-bold h-14 pl-10 text-xl focus:ring-green-500 transition-all ${errors.targetAmount ? 'border-red-500 bg-red-50' : 'border-black'}`}
@@ -2601,7 +2601,7 @@ const CreateRequestPage = () => {
                       <Camera size={28} className="text-black" />
                     </div>
                     <p className="text-sm font-black uppercase text-black mb-1">Click to Upload Proof</p>
-                    <p className="text-[10px] font-bold text-gray-400">Medical bills, ID cards, photos â€” donors will see these</p>
+                    <p className="text-[10px] font-bold text-gray-400">Medical bills, ID cards, photos �?" donors will see these</p>
                   </div>
                   {proofImages.length > 0 && (
                     <div className="grid grid-cols-3 gap-3 mt-3">
@@ -2611,14 +2611,14 @@ const CreateRequestPage = () => {
                           <button
                             onClick={() => setProofImages(p => p.filter((_, idx) => idx !== i))}
                             className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-black border border-white opacity-0 group-hover:opacity-100 transition-opacity"
-                          >âœ•</button>
+                          >�o.</button>
                         </div>
                       ))}
                     </div>
                   )}
                 </div>
 
-                {/* Location â€” GPS */}
+                {/* Location �?" GPS */}
                 <div className="space-y-3">
                   <label className="text-xs font-black uppercase text-gray-400 tracking-widest flex items-center gap-2">
                     <MapPin size={14} /> Location <span className="text-red-500">*</span>
@@ -2635,7 +2635,7 @@ const CreateRequestPage = () => {
                       <div className="p-3 bg-green-50 flex items-center gap-2">
                         <CheckCircle size={14} className="text-green-600 shrink-0" />
                         <span className="text-[10px] font-black text-green-700 uppercase tracking-widest">
-                          ðŸ“ {locationCoords.lat.toFixed(5)}, {locationCoords.lng.toFixed(5)} â€” Pin will appear at this spot on the map
+                          �Y"� {locationCoords.lat.toFixed(5)}, {locationCoords.lng.toFixed(5)} �?" Pin will appear at this spot on the map
                         </span>
                       </div>
                     </div>
@@ -2643,7 +2643,7 @@ const CreateRequestPage = () => {
                   <div className="flex gap-3">
                     <Input
                       className={`border-2 rounded-2xl font-bold h-14 flex-1 focus:ring-green-500 ${errors.location ? 'border-red-500 bg-red-50' : 'border-black'}`}
-                      placeholder="e.g. Chennai, Tamil Nadu or tap GPS â†’"
+                      placeholder="e.g. Chennai, Tamil Nadu or tap GPS �?'"
                       value={formData.location}
                       onChange={e => { setFormData({ ...formData, location: e.target.value }); setErrors({}); }}
                     />
@@ -2677,12 +2677,12 @@ const CreateRequestPage = () => {
                     />
                     {formData.upiId && (
                       <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[9px] font-black uppercase text-green-600 bg-green-100 px-2 py-1 rounded-lg">
-                        âœ“ Saved
+                        �o" Saved
                       </span>
                     )}
                   </div>
                   <p className="text-[10px] text-gray-400 font-bold">
-                    ðŸ’¡ Donors will use this UPI ID to send money directly to you. Leave blank to use platform default.
+                    �Y'� Donors will use this UPI ID to send money directly to you. Leave blank to use platform default.
                   </p>
                 </div>
 
@@ -2867,7 +2867,7 @@ const MapPage = () => {
                 <div className="space-y-1">
                   <div className="flex justify-between text-[9px] font-black uppercase">
                     <span>Raised</span>
-                    <span>â‚¹{req.raisedAmount.toLocaleString()} / â‚¹{req.targetAmount.toLocaleString()}</span>
+                    <span>�,�{req.raisedAmount.toLocaleString()} / �,�{req.targetAmount.toLocaleString()}</span>
                   </div>
                   <div className="h-2 bg-gray-100 rounded-full overflow-hidden border border-gray-300">
                     <div className="h-full bg-yellow-400 transition-all" style={{ width: `${Math.min((req.raisedAmount / req.targetAmount) * 100, 100)}%` }} />
@@ -2877,7 +2877,7 @@ const MapPage = () => {
                   onClick={() => navigate(`/request/${req.id}`)}
                   className="w-full mt-1 py-1.5 bg-black text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-gray-800 transition-colors"
                 >
-                  View Request â†’
+                  View Request �?'
                 </button>
               </div>
             </Popup>
@@ -2899,7 +2899,7 @@ const MapPage = () => {
                 onChange={e => setMapSearch(e.target.value)}
               />
               {mapSearch && (
-                <button onClick={() => setMapSearch('')} className="text-gray-400 hover:text-black transition-colors">âœ•</button>
+                <button onClick={() => setMapSearch('')} className="text-gray-400 hover:text-black transition-colors">�o.</button>
               )}
             </div>
             <button
@@ -2907,7 +2907,7 @@ const MapPage = () => {
               className="w-14 h-14 bg-white text-black border-4 border-black rounded-2xl flex items-center justify-center shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:bg-gray-50 transition-colors"
               title="Back to feed"
             >
-              â†
+              �?�
             </button>
           </div>
 
@@ -2939,7 +2939,7 @@ const MapPage = () => {
         <div className="w-full max-w-4xl overflow-x-auto flex gap-4 no-scrollbar pb-4">
           {filtered.length === 0 ? (
             <div className="min-w-[280px] bg-white border-4 border-black rounded-[2rem] p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center gap-2">
-              <span className="text-4xl">ðŸ—ºï¸</span>
+              <span className="text-4xl">�Y-�️</span>
               <span className="font-black uppercase text-sm">No results found</span>
             </div>
           ) : filtered.map(req => (
@@ -2967,7 +2967,7 @@ const MapPage = () => {
                 </div>
                 <div className="space-y-1 mt-1">
                   <div className="flex justify-between text-[8px] font-black uppercase">
-                    <span>â‚¹{req.raisedAmount.toLocaleString()}</span>
+                    <span>�,�{req.raisedAmount.toLocaleString()}</span>
                     <span>{Math.round(Math.min((req.raisedAmount / req.targetAmount) * 100, 100))}%</span>
                   </div>
                   <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden border border-black">
@@ -3048,7 +3048,7 @@ const AdminPage = () => {
             placeholder="Filter requests..."
             className="bg-transparent outline-none font-bold text-sm w-32 placeholder:text-gray-300"
           />
-          {adminSearch && <button onClick={() => setAdminSearch('')} className="text-gray-400 hover:text-black text-xs font-black">âœ•</button>}
+          {adminSearch && <button onClick={() => setAdminSearch('')} className="text-gray-400 hover:text-black text-xs font-black">�o.</button>}
         </div>
       </div>
       <div className="space-y-4 mb-10">
@@ -3079,7 +3079,7 @@ const AdminPage = () => {
                   )}
                 </div>
                 <div className="font-black italic uppercase tracking-tight line-clamp-1">{req.title}</div>
-                <div className="text-[10px] font-bold text-gray-400 uppercase">{req.requesterName} Â· {req.category}</div>
+                <div className="text-[10px] font-bold text-gray-400 uppercase">{req.requesterName} · {req.category}</div>
               </div>
               <div className="flex gap-2 shrink-0">
                 <button
@@ -3105,13 +3105,13 @@ const AdminPage = () => {
       {/* Flagged Only Section */}
       {flaggedRequests.length > 0 && (
         <>
-          <h2 className="text-2xl font-black italic uppercase tracking-tighter mb-4 text-red-600">ðŸš© Flagged Requests</h2>
+          <h2 className="text-2xl font-black italic uppercase tracking-tighter mb-4 text-red-600">�Ys� Flagged Requests</h2>
           <div className="space-y-4">
             {flaggedRequests.map(req => (
               <div key={req.id + '_flagged'} className="p-5 bg-red-50 border-4 border-red-400 rounded-[1.5rem] flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   <div className="font-black italic uppercase tracking-tight line-clamp-1">{req.title}</div>
-                  <div className="text-[10px] font-bold text-red-500 uppercase">{req.flagCount} flags Â· {req.requesterName}</div>
+                  <div className="text-[10px] font-bold text-red-500 uppercase">{req.flagCount} flags · {req.requesterName}</div>
                 </div>
                 <div className="flex gap-2 shrink-0">
                   <button onClick={() => adminOverrideStatus(req.id, 'Verified')} className="px-3 py-2 bg-green-500 text-black border-2 border-black rounded-xl font-black text-[10px] uppercase">
@@ -3179,7 +3179,7 @@ const ProfilePage = () => {
       {/* Stats Dashboard */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
         {[
-          { label: 'Total Donated', value: `â‚¹${totalDonated.toLocaleString()}`, bg: 'bg-black text-white', shadow: 'shadow-[4px_4px_0px_0px_rgba(253,224,71,1)]', icon: <Wallet size={18} className="text-yellow-400" /> },
+          { label: 'Total Donated', value: `�,�${totalDonated.toLocaleString()}`, bg: 'bg-black text-white', shadow: 'shadow-[4px_4px_0px_0px_rgba(253,224,71,1)]', icon: <Wallet size={18} className="text-yellow-400" /> },
           { label: 'Fulfillments', value: myFulfillments.length, bg: 'bg-green-500 text-black border-2 border-black', shadow: 'shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]', icon: <Gift size={18} className="text-black" /> },
           { label: 'My Requests', value: myRequests.length, bg: 'bg-yellow-400 text-black border-2 border-black', shadow: 'shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]', icon: <FileText size={18} className="text-black" /> },
           { label: 'Validations', value: myValidations, bg: 'bg-white text-black border-4 border-black', shadow: 'shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]', icon: <ThumbsUp size={18} className="text-blue-600" /> },
@@ -3225,7 +3225,7 @@ const ProfilePage = () => {
                     <div className="text-[10px] font-bold text-gray-400">{new Date(don.timestamp).toLocaleDateString()}</div>
                   </div>
                 </div>
-                <div className="font-black italic text-green-600">+â‚¹{don.amount}</div>
+                <div className="font-black italic text-green-600">+�,�{don.amount}</div>
               </div>
             ))}
           </div>
@@ -3239,7 +3239,7 @@ const ProfilePage = () => {
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 bg-blue-100 rounded-xl border-2 border-black flex items-center justify-center"><Gift size={16} className="text-blue-600" /></div>
                   <div>
-                    <div className="font-black text-sm uppercase">{ful.quantity}Ã— {ful.itemName}</div>
+                    <div className="font-black text-sm uppercase">{ful.quantity}�- {ful.itemName}</div>
                     <div className="text-[10px] font-bold text-gray-400">{new Date(ful.timestamp).toLocaleDateString()}</div>
                   </div>
                 </div>
@@ -3261,7 +3261,7 @@ const ProfilePage = () => {
                     <div className="text-[10px] font-bold text-gray-400 uppercase">{req.status}</div>
                   </div>
                 </div>
-                <div className="font-black italic">â‚¹{req.raisedAmount}</div>
+                <div className="font-black italic">�,�{req.raisedAmount}</div>
               </div>
             ))}
           </div>
@@ -3310,7 +3310,7 @@ const AppContent = () => {
 
   if (showSplash) return <SplashScreen onFinish={() => setShowSplash(false)} />;
 
-  // Show a branded loading screen while verifying session â€” never show AuthPage during this
+  // Show a branded loading screen while verifying session �?" never show AuthPage during this
   if (loading) return (
     <div className="fixed inset-0 bg-[#0a0a0a] flex flex-col items-center justify-center gap-6">
       <div className="w-16 h-16 bg-green-500 rounded-[1.5rem] flex items-center justify-center border-4 border-white shadow-[0_0_40px_rgba(34,197,94,0.4)]">
