@@ -49,8 +49,19 @@ const mapDoc = (doc: any): CharityRequest => ({
     urgency: doc.urgency || 'Medium',
     status: doc.status || 'Pending',
     location: (() => {
-        try { return typeof doc.location === 'string' ? JSON.parse(doc.location) : (doc.location || { lat: 0, lng: 0, address: '' }); }
-        catch { return { lat: 0, lng: 0, address: '' }; }
+        try {
+            return typeof doc.location === 'string' ? JSON.parse(doc.location) : (doc.location || { lat: 0, lng: 0, address: '' });
+        }
+        catch {
+            // Recover lat/lng from truncated JSON strings using regex
+            const matchLat = typeof doc.location === 'string' && doc.location.match(/"lat":\s*([-0-9.]+)/);
+            const matchLng = typeof doc.location === 'string' && doc.location.match(/"lng":\s*([-0-9.]+)/);
+            if (matchLat && matchLng) {
+                return { lat: Number(matchLat[1]), lng: Number(matchLng[1]), address: 'Saved Location' };
+            }
+            // If truly missing, slightly scatter around center so they don't exactly overlap
+            return { lat: 12.9716 + (Math.random() - 0.5) * 0.05, lng: 77.5946 + (Math.random() - 0.5) * 0.05, address: '' };
+        }
     })(),
     proofUrls: Array.isArray(doc.proofUrls) ? doc.proofUrls : (() => { try { return JSON.parse(doc.proofUrls || '[]'); } catch { return []; } })(),
     neededItems: (() => { try { return Array.isArray(doc.neededItems) ? doc.neededItems : JSON.parse(doc.neededItems || '[]'); } catch { return []; } })(),
@@ -126,7 +137,11 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
                 status: 'Pending',
                 requesterName: req.requesterName,
                 requesterId: req.requesterId || 'anonymous',
-                location: JSON.stringify(req.location || {}).substring(0, 99),
+                location: JSON.stringify({
+                    lat: req.location?.lat || 0,
+                    lng: req.location?.lng || 0,
+                    address: (req.location?.address || '').substring(0, 35) // Keep short to avoid Appwrite DB string limits
+                }),
                 proofUrls: uploadedUrls,
                 neededItems: JSON.stringify(req.neededItems || []),
                 createdAt: Date.now(),
