@@ -49,19 +49,27 @@ const mapDoc = (doc: any): CharityRequest => ({
     urgency: doc.urgency || 'Medium',
     status: doc.status || 'Pending',
     location: (() => {
+        let parsed = { lat: 0, lng: 0, address: '' };
         try {
-            return typeof doc.location === 'string' ? JSON.parse(doc.location) : (doc.location || { lat: 0, lng: 0, address: '' });
-        }
-        catch {
-            // Recover lat/lng from truncated JSON strings using regex
+            parsed = typeof doc.location === 'string' ? JSON.parse(doc.location) : (doc.location || parsed);
+        } catch {
             const matchLat = typeof doc.location === 'string' && doc.location.match(/"lat":\s*([-0-9.]+)/);
             const matchLng = typeof doc.location === 'string' && doc.location.match(/"lng":\s*([-0-9.]+)/);
             if (matchLat && matchLng) {
-                return { lat: Number(matchLat[1]), lng: Number(matchLng[1]), address: 'Saved Location' };
+                parsed = { lat: Number(matchLat[1]), lng: Number(matchLng[1]), address: 'Saved Location' };
             }
-            // If truly missing, slightly scatter around center so they don't exactly overlap
-            return { lat: 12.9716 + (Math.random() - 0.5) * 0.05, lng: 77.5946 + (Math.random() - 0.5) * 0.05, address: '' };
         }
+
+        // If coordinate is fully missing or strictly 0,0, apply a deterministic scatter around Bangalore 
+        // to prevent overlapping stacks of dots. We use doc.$id to keep it consistent between renders.
+        if (!parsed.lat || (parsed.lat === 0 && parsed.lng === 0)) {
+            const seed = [...(doc.$id || '')].reduce((acc, char) => acc + char.charCodeAt(0), 0);
+            parsed.lat = 12.9716 + (Math.sin(seed) * 0.08); // Fixed scatter radius ~8km
+            parsed.lng = 77.5946 + (Math.cos(seed) * 0.08);
+            parsed.address = parsed.address || 'Location not provided';
+        }
+
+        return parsed;
     })(),
     proofUrls: Array.isArray(doc.proofUrls) ? doc.proofUrls : (() => { try { return JSON.parse(doc.proofUrls || '[]'); } catch { return []; } })(),
     neededItems: (() => { try { return Array.isArray(doc.neededItems) ? doc.neededItems : JSON.parse(doc.neededItems || '[]'); } catch { return []; } })(),

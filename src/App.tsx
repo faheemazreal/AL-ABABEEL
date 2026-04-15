@@ -2720,7 +2720,7 @@ const MapPage = () => {
         {filtered.map((req) => (
           <Marker
             key={req.id}
-            position={[req.location.lat || 12.9716, req.location.lng || 77.5946]}
+            position={[req.location.lat, req.location.lng]}
             icon={markerIcon()}
           >
             <Popup className="custom-popup" minWidth={220}>
