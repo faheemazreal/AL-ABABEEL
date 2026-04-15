@@ -2456,16 +2456,41 @@ const ProfilePage = () => {
 
 const AppContent = () => {
   const { user, loading } = useAuth();
-  // Skip splash if we have a user, or if we are CURRENTLY in an OAuth redirect flow
-  const isOAuthRedirect = window.location.search.includes('userId=');
+  // Detect OAuth callback: Appwrite returns ?userId=XXX&secret=YYY in the redirect URL
+  const isOAuthRedirect = new URLSearchParams(window.location.search).has('userId') &&
+    new URLSearchParams(window.location.search).has('secret');
   const [showSplash, setShowSplash] = useState(!localStorage.getItem('aidconnect_user') && !isOAuthRedirect);
   const location = useLocation();
   const navigate = useNavigate();
 
-  // If we have a user while splash is still showing (e.g. background check finished faster),
-  // we could potentially skip it, but let's keep it consistent for now.
+  // After OAuth login is confirmed by AuthContext, navigate to home page
+  useEffect(() => {
+    const handleAuthReady = () => {
+      navigate('/', { replace: true });
+    };
+    window.addEventListener('aidconnect:auth-ready', handleAuthReady);
+    return () => window.removeEventListener('aidconnect:auth-ready', handleAuthReady);
+  }, [navigate]);
+
   if (showSplash) return <SplashScreen onFinish={() => setShowSplash(false)} />;
-  if (loading) return null;
+
+  // Show a branded loading screen while verifying session — never show AuthPage during this
+  if (loading) return (
+    <div className="fixed inset-0 bg-[#0a0a0a] flex flex-col items-center justify-center gap-6">
+      <div className="w-16 h-16 bg-green-500 rounded-[1.5rem] flex items-center justify-center border-4 border-white shadow-[0_0_40px_rgba(34,197,94,0.4)]">
+        <Handshake size={32} className="text-black" />
+      </div>
+      <motion.div
+        animate={{ rotate: 360 }}
+        transition={{ repeat: Infinity, duration: 1.2, ease: 'linear' }}
+        className="w-10 h-10 border-4 border-green-500 border-t-transparent rounded-full"
+      />
+      <p className="text-[11px] font-black uppercase tracking-[0.4em] text-gray-500">
+        {isOAuthRedirect ? 'Completing Sign-In...' : 'Loading...'}
+      </p>
+    </div>
+  );
+
   if (!user) return <AuthPage />;
 
   const hideNav = ['/request/', '/create-request', '/verify/', '/fulfill/'].some(path => location.pathname.startsWith(path));

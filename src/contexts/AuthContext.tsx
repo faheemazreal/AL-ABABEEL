@@ -28,21 +28,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     useEffect(() => {
         const checkAuth = async () => {
             const params = new URLSearchParams(window.location.search);
+            // Appwrite OAuth callback includes both 'userId' and 'secret' params
             const isOAuthRedirect = params.has('secret') && params.has('userId');
 
-            // STEP 1: Instantly restore from localStorage (no token required)
-            // This prevents the login page from flashing on every reload
-            const savedUser = localStorage.getItem('aidconnect_user');
-            if (savedUser) {
-                setUser(JSON.parse(savedUser));
-                setLoading(false);
-                // Don't return — still verify session with Appwrite in background
+            // On OAuth redirect, keep loading=true the whole time so we NEVER flash
+            // the AuthPage — we wait until the session is fully confirmed.
+            if (!isOAuthRedirect) {
+                // Non-OAuth: instantly restore from localStorage so there's no flash
+                const savedUser = localStorage.getItem('aidconnect_user');
+                if (savedUser) {
+                    try {
+                        setUser(JSON.parse(savedUser));
+                    } catch { /* ignore malformed data */ }
+                    setLoading(false);
+                    // Continue in background to verify / update the stored user
+                }
             }
 
-            // STEP 2: Verify with Appwrite (updates photo, confirms session is alive)
+            // Verify with Appwrite (confirm session is alive and get latest profile)
             try {
                 if (isOAuthRedirect) {
-                    await new Promise(r => setTimeout(r, 800));
+                    // Small delay to give Appwrite's OAuth handler time to finalize the session
+                    await new Promise(r => setTimeout(r, 1000));
                 }
 
                 const session = await account.get();
@@ -68,6 +75,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                         reputation: 0,
                     };
 
+                    // Clean OAuth params from URL without causing a reload
                     if (isOAuthRedirect) {
                         window.history.replaceState({}, document.title, window.location.pathname);
                     }
@@ -75,17 +83,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     setUser(mappedUser);
                     localStorage.setItem('aidconnect_user', JSON.stringify(mappedUser));
                     setLoading(false);
-                } else if (!savedUser) {
-                    // No Appwrite session AND no localStorage — user is truly logged out
-                    setLoading(false);
+
+                    // Signal the router that OAuth login finished so it can navigate to home
+                    if (isOAuthRedirect) {
+                        window.dispatchEvent(new CustomEvent('aidconnect:auth-ready'));
+                    }
+                } else {
+                    const savedUser = localStorage.getItem('aidconnect_user');
+                    if (!savedUser) {
+                        // No session anywhere — show login
+                        setLoading(false);
+                    }
                 }
             } catch (err: any) {
-                console.error('Auth check:', err.message);
+                console.error('Auth check failed:', err.message);
                 if (isOAuthRedirect) {
-                    localStorage.setItem('aidconnect_last_error', err.message || 'Failed to sync session');
+                    localStorage.setItem('aidconnect_last_error', err.message || 'Failed to sync Google session');
                 }
+                const savedUser = localStorage.getItem('aidconnect_user');
                 if (!savedUser) {
-                    // No session anywhere — show login
                     setLoading(false);
                 }
             }
@@ -95,7 +111,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
 
     const login = async (email: string, password: string) => {
-        // Use Appwrite SDK directly — works on Vercel, not just locally
         await account.createEmailPasswordSession(email, password);
         const session = await account.get();
         const mappedUser: AppUser = {
@@ -111,7 +126,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const demoLogin = async (role: UserRole) => {
-        // Demo login is local-only, keep as is for development
         try {
             const res = await fetch('/api/auth/login', {
                 method: 'POST',
@@ -124,15 +138,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 localStorage.setItem('aidconnect_user', JSON.stringify(data.user));
                 localStorage.setItem('aidconnect_token', data.token);
             }
-        } catch (e) { console.warn('Demo login not available on Vercel'); }
+        } catch (e) { console.warn('Demo login not available'); }
     };
 
     const register = async (userData: any) => {
         const { email, password, firstName, lastName } = userData;
         const displayName = `${firstName} ${lastName}`.trim();
-        // 1. Create Appwrite account
         await account.create(ID.unique(), email, password, displayName);
-        // 2. Log in immediately after
         await account.createEmailPasswordSession(email, password);
         const session = await account.get();
         const mappedUser: AppUser = {
@@ -148,7 +160,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const logout = () => {
-        // Sign out from Appwrite too
         account.deleteSession('current').catch(() => { });
         setUser(null);
         localStorage.removeItem('aidconnect_user');
