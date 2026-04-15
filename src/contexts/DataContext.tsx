@@ -22,10 +22,10 @@ interface DataContextType {
     validateRequest: (requestId: string, userId: string) => void;
     flagRequest: (requestId: string, userId: string) => void;
     // Admin Controls
-    adminDeleteRequest: (requestId: string) => void;
-    adminOverrideStatus: (requestId: string, status: CharityRequest['status']) => void;
+    adminDeleteRequest: (requestId: string) => Promise<void>;
+    adminOverrideStatus: (requestId: string, status: CharityRequest['status']) => Promise<void>;
     // Owner Controls
-    deleteRequest: (requestId: string) => void;
+    deleteRequest: (requestId: string) => Promise<void>;
     updateRequest: (requestId: string, updates: Partial<Pick<CharityRequest, 'title' | 'description' | 'targetAmount' | 'urgency' | 'category'>>) => void;
 }
 
@@ -72,9 +72,11 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
         try {
             const response = await databases.listDocuments(DB_ID, REQ_COL_ID);
             const mapped = response.documents.map(mapDoc);
-            mapped.sort((a, b) => b.createdAt - a.createdAt);
-            setRequests(mapped);
-            console.log(`[DataContext] Loaded ${mapped.length} requests from Appwrite.`);
+            // Filter out soft-deleted documents
+            const active = mapped.filter(r => r.status !== 'Deleted');
+            active.sort((a, b) => b.createdAt - a.createdAt);
+            setRequests(active);
+            console.log(`[DataContext] Loaded ${active.length} active requests (${mapped.length - active.length} deleted filtered out).`);
         } catch (e: any) {
             console.error('[DataContext] LOAD FAILED:', e.message);
         }
@@ -205,22 +207,54 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     // Admin Controls
-    const adminDeleteRequest = (requestId: string) => {
+    const adminDeleteRequest = async (requestId: string) => {
+        // Optimistic local removal
         setRequests(prev => prev.filter(r => r.id !== requestId));
-        // Optionally also delete from Appwrite (best effort)
-        databases.deleteDocument(DB_ID, REQ_COL_ID, requestId).catch(() => { });
+        try {
+            // Soft-delete: set status to 'Deleted' via updateDocument
+            // This works with Any-write permissions unlike deleteDocument
+            await databases.updateDocument(DB_ID, REQ_COL_ID, requestId, { status: 'Deleted' });
+            console.log('[DataContext] Admin soft-deleted request:', requestId);
+        } catch (err: any) {
+            console.error('[DataContext] Admin delete FAILED — trying hard delete:', err?.message);
+            // Fallback: try actual deleteDocument
+            try {
+                await databases.deleteDocument(DB_ID, REQ_COL_ID, requestId);
+                console.log('[DataContext] Admin hard-deleted request:', requestId);
+            } catch (err2: any) {
+                console.error('[DataContext] Both delete strategies failed:', err2?.message);
+                // Revert optimistic update if both fail
+                await loadRequests();
+            }
+        }
     };
 
-    const adminOverrideStatus = (requestId: string, status: CharityRequest['status']) => {
+    const adminOverrideStatus = async (requestId: string, status: CharityRequest['status']) => {
+        // Optimistic local update
         setRequests(prev => prev.map(r =>
             r.id === requestId ? { ...r, status, flagCount: 0, flaggedBy: [] } : r
         ));
+        try {
+            // Persist status change to Appwrite
+            await databases.updateDocument(DB_ID, REQ_COL_ID, requestId, { status });
+            console.log('[DataContext] Admin status override persisted:', requestId, '->', status);
+        } catch (err: any) {
+            console.error('[DataContext] Status override persist FAILED:', err?.message);
+        }
     };
 
     // Owner Controls
-    const deleteRequest = (requestId: string) => {
+    const deleteRequest = async (requestId: string) => {
+        // Optimistic local removal
         setRequests(prev => prev.filter(r => r.id !== requestId));
-        databases.deleteDocument(DB_ID, REQ_COL_ID, requestId).catch(() => { });
+        try {
+            await databases.updateDocument(DB_ID, REQ_COL_ID, requestId, { status: 'Deleted' });
+            console.log('[DataContext] Owner soft-deleted request:', requestId);
+        } catch (err: any) {
+            console.error('[DataContext] Owner delete failed:', err?.message);
+            // Fallback: try hard delete
+            databases.deleteDocument(DB_ID, REQ_COL_ID, requestId).catch(() => { });
+        }
     };
 
     const updateRequest = (

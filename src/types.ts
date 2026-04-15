@@ -1,7 +1,7 @@
 export type UserRole = 'requester' | 'donor' | 'eyewitness' | 'admin';
 export type RequestCategory = 'Food' | 'Medical' | 'Emergency' | 'Education';
 export type Urgency = 'Low' | 'Medium' | 'High';
-export type RequestStatus = 'Pending' | 'Verified' | 'Completed' | 'Flagged';
+export type RequestStatus = 'Pending' | 'Verified' | 'Completed' | 'Flagged' | 'Deleted';
 
 export interface Review {
   id: string;
