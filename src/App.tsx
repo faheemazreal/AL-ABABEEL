@@ -2685,18 +2685,16 @@ const MapPage = () => {
     All: '#000000',
   };
 
-  const markerIcon = (category: string) => {
-    const color = CATEGORY_COLORS[category] || '#000';
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 32 40">
-      <path d="M16 0C7.2 0 0 7.2 0 16c0 12 16 24 16 24S32 28 32 16C32 7.2 24.8 0 16 0z" fill="${color}" stroke="white" stroke-width="2.5"/>
-      <circle cx="16" cy="16" r="7" fill="white" opacity="0.9"/>
+  const markerIcon = () => {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10" fill="#22c55e" stroke="white" stroke-width="3"/>
     </svg>`;
     const L = (window as any).L;
     return L?.divIcon({
-      html: `<div style="background:transparent">${svg}</div>`,
-      iconSize: [32, 40],
-      iconAnchor: [16, 40],
-      popupAnchor: [0, -42],
+      html: `<div style="background:transparent; filter: drop-shadow(0px 3px 4px rgba(0,0,0,0.4))">${svg}</div>`,
+      iconSize: [24, 24],
+      iconAnchor: [12, 12],
+      popupAnchor: [0, -14],
       className: '',
     });
   };
@@ -2723,7 +2721,7 @@ const MapPage = () => {
           <Marker
             key={req.id}
             position={[req.location.lat || 12.9716, req.location.lng || 77.5946]}
-            icon={markerIcon(req.category)}
+            icon={markerIcon()}
           >
             <Popup className="custom-popup" minWidth={220}>
               <div className="p-3 space-y-2 font-sans">
