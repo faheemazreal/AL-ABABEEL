@@ -55,6 +55,7 @@ const mapDoc = (doc: any): CharityRequest => ({
     proofUrls: Array.isArray(doc.proofUrls) ? doc.proofUrls : (() => { try { return JSON.parse(doc.proofUrls || '[]'); } catch { return []; } })(),
     neededItems: (() => { try { return Array.isArray(doc.neededItems) ? doc.neededItems : JSON.parse(doc.neededItems || '[]'); } catch { return []; } })(),
     createdAt: typeof doc.createdAt === 'string' ? new Date(doc.createdAt).getTime() : (doc.createdAt || Date.now()),
+    requesterUpiId: doc.requesterUpiId || '',
     validationCount: doc.validationCount || 0,
     flagCount: doc.flagCount || 0,
     validatedBy: [],
@@ -126,11 +127,13 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
                 status: 'Pending',
                 requesterName: req.requesterName,
                 requesterId: req.requesterId || 'anonymous',
+                requesterUpiId: req.requesterUpiId || '',
                 location: JSON.stringify(req.location || {}).substring(0, 99),
                 proofUrls: uploadedUrls,
                 neededItems: JSON.stringify(req.neededItems || []),
                 createdAt: Date.now(),
             };
+
 
             const created = await databases.createDocument(DB_ID, REQ_COL_ID, ID.unique(), docData);
             console.log('[DataContext] Request saved to Appwrite! ID:', created.$id);

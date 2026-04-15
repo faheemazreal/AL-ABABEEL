@@ -39,6 +39,7 @@ export interface CharityRequest {
   id: string;
   requesterId: string;
   requesterName: string;
+  requesterUpiId?: string;   // UPI ID for direct donations
   title: string;
   description: string;
   category: RequestCategory;
