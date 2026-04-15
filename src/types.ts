@@ -1,4 +1,4 @@
-export type UserRole = 'requester' | 'donor' | 'eyewitness';
+export type UserRole = 'requester' | 'donor' | 'eyewitness' | 'admin';
 export type RequestCategory = 'Food' | 'Medical' | 'Emergency' | 'Education';
 export type Urgency = 'Low' | 'Medium' | 'High';
 export type RequestStatus = 'Pending' | 'Verified' | 'Completed' | 'Flagged';
@@ -22,12 +22,17 @@ export interface AppUser {
   reputation: number;
   upiId?: string;
   location?: { lat: number; lng: number; address: string };
+  // Computed stats (tracked locally)
+  totalDonated?: number;
+  totalFulfillments?: number;
+  totalValidations?: number;
 }
 
 export interface NeededItem {
   name: string;
   total: number;
   fulfilled: number;
+  unitPrice?: number; // price per unit for partial fulfillment calculation
 }
 
 export interface CharityRequest {
@@ -45,6 +50,11 @@ export interface CharityRequest {
   location: { lat: number; lng: number; address: string };
   proofUrls: string[];
   createdAt: number;
+  // Community validation
+  validationCount?: number;
+  flagCount?: number;
+  validatedBy?: string[]; // list of user IDs that validated
+  flaggedBy?: string[];   // list of user IDs that flagged
 }
 
 export interface Vendor {
@@ -64,6 +74,17 @@ export interface Donation {
   donorName: string;
   amount: number;
   transactionId: string;
+  timestamp: number;
+}
+
+export interface Fulfillment {
+  id: string;
+  requestId: string;
+  userId: string;
+  userName: string;
+  itemName: string;
+  quantity: number;
+  method: 'vendor' | 'self';
   timestamp: number;
 }
 
