@@ -308,17 +308,87 @@ const VisualDonation = ({ amount, target, category }: { amount: number, target: 
   );
 };
 
+// Payment app logos served from CDN
+const PAYMENT_APPS = [
+  {
+    name: 'BHIM',
+    logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/6/6e/BHIM_logo.png/240px-BHIM_logo.png',
+    scheme: (upi: string, name: string, amt: number) => `upi://pay?pa=${upi}&pn=${name}&am=${amt}&cu=INR`,
+    bg: '#FF6600',
+  },
+  {
+    name: 'GPay',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Google_Pay_Logo.svg/512px-Google_Pay_Logo.svg.png',
+    scheme: (upi: string, name: string, amt: number) => `gpay://upi/pay?pa=${upi}&pn=${name}&am=${amt}&cu=INR`,
+    bg: '#ffffff',
+  },
+  {
+    name: 'Paytm',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Paytm_Logo_%28standalone%29.svg/512px-Paytm_Logo_%28standalone%29.svg.png',
+    scheme: (upi: string, name: string, amt: number) => `paytmmp://pay?pa=${upi}&pn=${name}&am=${amt}&cu=INR`,
+    bg: '#002970',
+  },
+  {
+    name: 'PhonePe',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/PhonePe_Logo.svg/512px-PhonePe_Logo.svg.png',
+    scheme: (upi: string, name: string, amt: number) => `phonepe://pay?pa=${upi}&pn=${name}&am=${amt}&cu=INR`,
+    bg: '#5f259f',
+  },
+  {
+    name: 'Amazon',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Amazon_icon.svg/512px-Amazon_icon.svg.png',
+    scheme: (upi: string, name: string, amt: number) => `upi://pay?pa=${upi}&pn=${name}&am=${amt}&cu=INR&mc=0000`,
+    bg: '#FF9900',
+  },
+];
+
+// Circular progress SVG component
+const CircularProgress = ({ value, max, size = 96 }: { value: number; max: number; size?: number }) => {
+  const pct = max > 0 ? Math.min((value / max) * 100, 100) : 0;
+  const r = (size - 12) / 2;
+  const circ = 2 * Math.PI * r;
+  const offset = circ - (pct / 100) * circ;
+  const label = pct < 1 ? '<1%' : `${Math.round(pct)}%`;
+  return (
+    <svg width={size} height={size} className="rotate-[-90deg]">
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#f0f0f0" strokeWidth={10} />
+      <motion.circle
+        cx={size / 2} cy={size / 2} r={r}
+        fill="none" stroke="#9b1c4a" strokeWidth={10}
+        strokeLinecap="round"
+        strokeDasharray={circ}
+        initial={{ strokeDashoffset: circ }}
+        animate={{ strokeDashoffset: offset }}
+        transition={{ duration: 1.2, ease: 'easeOut' }}
+      />
+      <text
+        x="50%" y="50%"
+        dominantBaseline="middle" textAnchor="middle"
+        className="rotate-90"
+        style={{ transform: `rotate(90deg) translate(0, 0)`, transformOrigin: 'center', fill: '#111', fontSize: 13, fontWeight: 900 }}
+      >{label}</text>
+    </svg>
+  );
+};
+
 const UPIDonationModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
   upiId: string;
   title: string;
   amount?: number;
-}> = ({ isOpen, onClose, upiId, title, amount = 100 }) => {
+  raisedAmount?: number;
+  targetAmount?: number;
+  supportersCount?: number;
+}> = ({ isOpen, onClose, upiId, title, amount = 100, raisedAmount = 0, targetAmount = 0, supportersCount = 0 }) => {
   const [copied, setCopied] = useState(false);
+  const [showQR, setShowQR] = useState(false);
   const [notInstalled, setNotInstalled] = useState(false);
+  const [customAmount, setCustomAmount] = useState(String(amount));
 
-  const upiUrl = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(title)}&am=${amount}&cu=INR`;
+  const amt = parseInt(customAmount) || amount;
+  const upiPayload = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(title)}&am=${amt}&cu=INR&tn=${encodeURIComponent('Donation via AL ABABEEL')}`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiPayload)}&margin=10&color=000000&bgcolor=ffffff`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(upiId);
@@ -326,82 +396,178 @@ const UPIDonationModal: React.FC<{
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleUPIPay = () => {
-    // Try to open UPI deep link
+  const openApp = (scheme: string) => {
     const a = document.createElement('a');
-    a.href = upiUrl;
+    a.href = scheme;
     a.click();
-    // Detect if app didn't open (user stays on page)
-    setTimeout(() => setNotInstalled(true), 1500);
+    setTimeout(() => setNotInstalled(true), 1800);
   };
 
+  const fmt = (n: number) => n >= 100000
+    ? `Rs.${(n / 100000).toFixed(2).replace(/\.?0+$/, '')} Lakh`
+    : `Rs.${n.toLocaleString('en-IN')}`;
+
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) { onClose(); setNotInstalled(false); } }}>
-      <DialogContent className="border-4 border-black rounded-[2rem] p-8 max-w-sm">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-black italic uppercase tracking-tighter">Pay ₹{amount} via UPI</DialogTitle>
-          <DialogDescription className="font-bold text-gray-600">
-            Use Google Pay, PhonePe, Paytm or any UPI app.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4 py-2">
-          {/* UPI Deep Link Buttons */}
-          <div className="grid grid-cols-3 gap-3">
-            {[
-              { name: 'Google Pay', scheme: `gpay://upi/pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(title)}&am=${amount}&cu=INR`, color: 'bg-blue-50 border-blue-200', emoji: '🟢' },
-              { name: 'PhonePe', scheme: `phonepe://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(title)}&am=${amount}&cu=INR`, color: 'bg-purple-50 border-purple-200', emoji: '🟣' },
-              { name: 'Paytm', scheme: `paytmmp://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(title)}&am=${amount}&cu=INR`, color: 'bg-sky-50 border-sky-200', emoji: '🔵' },
-            ].map(app => (
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) { onClose(); setNotInstalled(false); setShowQR(false); } }}>
+      <DialogContent className="border-4 border-black rounded-[2rem] p-0 max-w-sm overflow-hidden">
+
+        {/* Header */}
+        <div className="bg-[#9b1c4a] text-white px-6 pt-6 pb-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center border-2 border-white/30">
+                <HandHeart size={20} className="text-white" />
+              </div>
+              <div>
+                <div className="text-[10px] font-black uppercase tracking-widest opacity-70">Donate</div>
+                {supportersCount > 0 && (
+                  <div className="text-xs font-bold underline underline-offset-2 opacity-80">
+                    {supportersCount.toLocaleString()} supporters
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Circular progress */}
+            {targetAmount > 0 && (
+              <div className="relative">
+                <CircularProgress value={raisedAmount} max={targetAmount} size={80} />
+              </div>
+            )}
+          </div>
+
+          {/* Raised stats */}
+          {targetAmount > 0 && (
+            <div className="mt-3">
+              <div className="text-[10px] font-black uppercase tracking-widest opacity-60">Raised</div>
+              <div className="text-2xl font-black">{fmt(raisedAmount)}</div>
+              <div className="text-xs opacity-60 font-bold">of {fmt(targetAmount)}</div>
+            </div>
+          )}
+        </div>
+
+        <div className="px-6 py-5 space-y-4">
+          {/* Amount input */}
+          <div className="space-y-1">
+            <label className="text-[9px] font-black uppercase tracking-widest text-gray-400">Amount (₹)</label>
+            <div className="flex gap-2">
+              {[100, 500, 1000].map(preset => (
+                <button
+                  key={preset}
+                  onClick={() => setCustomAmount(String(preset))}
+                  className={`flex-1 h-9 rounded-xl border-2 font-black text-xs transition-all ${customAmount === String(preset) ? 'bg-[#9b1c4a] text-white border-[#9b1c4a]' : 'bg-white text-black border-black hover:bg-gray-50'}`}
+                >
+                  ₹{preset}
+                </button>
+              ))}
+              <input
+                type="number"
+                value={customAmount}
+                onChange={e => setCustomAmount(e.target.value)}
+                placeholder="Other"
+                className="flex-1 h-9 border-2 border-black rounded-xl font-black text-xs text-center outline-none focus:border-[#9b1c4a]"
+              />
+            </div>
+          </div>
+
+          {/* Donate Now Button */}
+          <button
+            onClick={() => openApp(upiPayload)}
+            className="w-full h-12 bg-[#9b1c4a] text-white font-black uppercase tracking-widest rounded-2xl text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)] hover:brightness-110 transition-all active:scale-95"
+          >
+            Donate Now
+          </button>
+          <p className="text-[9px] text-gray-400 text-center font-bold uppercase tracking-widest -mt-2">Card, Netbanking, Cheque pickups</p>
+
+          {/* Divider */}
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-px bg-gray-200" />
+            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Or <span className="text-[#9b1c4a]">Donate using</span></span>
+            <div className="flex-1 h-px bg-gray-200" />
+          </div>
+
+          {/* QR Code */}
+          <div className="flex flex-col items-center gap-3">
+            {showQR ? (
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="border-4 border-black rounded-2xl overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+              >
+                <img
+                  src={qrUrl}
+                  alt="UPI QR Code"
+                  className="w-48 h-48 object-cover"
+                  loading="lazy"
+                />
+              </motion.div>
+            ) : (
+              <div className="w-48 h-48 border-4 border-dashed border-gray-200 rounded-2xl flex items-center justify-center bg-gray-50">
+                <div className="text-center space-y-2">
+                  <div className="text-4xl">📱</div>
+                  <div className="text-[10px] font-black uppercase text-gray-300 tracking-widest">QR will appear here</div>
+                </div>
+              </div>
+            )}
+
+            <button
+              onClick={() => setShowQR(!showQR)}
+              className="px-6 py-2 border-2 border-[#9b1c4a] text-[#9b1c4a] rounded-full font-black text-xs uppercase tracking-widest hover:bg-[#9b1c4a] hover:text-white transition-all"
+            >
+              {showQR ? 'Hide QR' : 'Generate QR'}
+            </button>
+
+            <p className="text-[9px] text-gray-400 font-bold">Scan &amp; donate with any app</p>
+          </div>
+
+          {/* Payment App Icons */}
+          <div className="flex justify-center gap-3 pb-1">
+            {PAYMENT_APPS.map(app => (
               <button
                 key={app.name}
-                onClick={() => {
-                  const a = document.createElement('a');
-                  a.href = app.scheme;
-                  a.click();
-                  setTimeout(() => setNotInstalled(true), 1500);
-                }}
-                className={`p-3 ${app.color} border-2 rounded-2xl flex flex-col items-center gap-1 font-black text-[10px] uppercase tracking-widest hover:opacity-80 transition-opacity`}
+                onClick={() => openApp(app.scheme(encodeURIComponent(upiId), encodeURIComponent(title), amt))}
+                title={`Pay with ${app.name}`}
+                className="group flex flex-col items-center gap-1"
               >
-                <span className="text-2xl">{app.emoji}</span>
-                {app.name}
+                <div
+                  className="w-11 h-11 rounded-full border-2 border-gray-200 flex items-center justify-center overflow-hidden shadow-md group-hover:scale-110 group-hover:border-gray-400 transition-all"
+                  style={{ backgroundColor: app.bg }}
+                >
+                  <img
+                    src={app.logo}
+                    alt={app.name}
+                    className="w-7 h-7 object-contain"
+                    onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
+                </div>
+                <span className="text-[8px] font-black text-gray-400 uppercase tracking-wide">{app.name}</span>
               </button>
             ))}
           </div>
 
-          <Button
-            onClick={handleUPIPay}
-            className="w-full h-12 bg-black text-white border-2 border-black font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(34,197,94,1)]"
-          >
-            Open Any UPI App <ExternalLink size={16} className="ml-2" />
-          </Button>
-
-          {/* Fallback: copy UPI ID */}
+          {/* Copy UPI ID fallback */}
           {notInstalled && (
-            <div className="p-4 bg-yellow-50 border-2 border-yellow-400 border-dashed rounded-2xl space-y-3">
-              <p className="text-xs font-black uppercase text-yellow-700">⚠️ App not detected? Copy UPI ID manually:</p>
-              <div className="flex items-center gap-2 bg-white border-2 border-black rounded-xl p-3">
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="p-3 bg-yellow-50 border-2 border-yellow-400 border-dashed rounded-2xl space-y-2"
+            >
+              <p className="text-[10px] font-black uppercase text-yellow-700">⚠️ App not opening? Copy UPI ID:</p>
+              <div className="flex items-center gap-2 bg-white border-2 border-black rounded-xl p-2">
                 <span className="flex-1 font-black text-sm truncate">{upiId}</span>
-                <Button size="sm" variant="outline" onClick={handleCopy} className="border-2 border-black h-8 font-black text-xs shrink-0">
-                  {copied ? <Check size={12} /> : <Copy size={12} />}
-                </Button>
+                <button onClick={handleCopy} className="shrink-0 bg-black text-white rounded-lg px-3 py-1 text-xs font-black">
+                  {copied ? '✓ Copied' : 'Copy'}
+                </button>
               </div>
-            </div>
+            </motion.div>
           )}
-
-          <div className="p-4 bg-gray-50 border-2 border-black border-dashed rounded-2xl">
-            <div className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-1">UPI ID</div>
-            <div className="font-black italic flex items-center justify-between gap-2">
-              <span className="truncate text-sm">{upiId}</span>
-              <button onClick={handleCopy} className="shrink-0 text-green-600 font-black text-xs uppercase flex items-center gap-1">
-                {copied ? <><Check size={12} /> Copied!</> : <><Copy size={12} /> Copy</>}
-              </button>
-            </div>
-          </div>
         </div>
       </DialogContent>
     </Dialog>
   );
 };
+
+
 
 const RequestCard: React.FC<{ request: CharityRequest }> = ({ request }) => {
   const navigate = useNavigate();
@@ -426,6 +592,9 @@ const RequestCard: React.FC<{ request: CharityRequest }> = ({ request }) => {
         onClose={() => setShowUPI(false)}
         upiId={localStorage.getItem('aidconnect_upi') || request.requesterId?.substring(0, 8) + '@okaxis' || 'charity@okaxis'}
         title={request.title}
+        raisedAmount={request.raisedAmount}
+        targetAmount={request.targetAmount}
+        supportersCount={request.validationCount || 0}
       />
       <Card
         className="overflow-hidden border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transition-all cursor-pointer rounded-[2rem]"
@@ -1427,6 +1596,9 @@ const RequestDetailPage = () => {
         upiId={localStorage.getItem('aidconnect_upi') || (request.requesterId ? `${request.requesterId.substring(0, 8)}@okaxis` : 'charity@okaxis')}
         title={request.title}
         amount={parseInt(donationAmount) || 100}
+        raisedAmount={request.raisedAmount}
+        targetAmount={request.targetAmount}
+        supportersCount={(donations.filter(d => d.requestId === request.id).length)}
       />
 
       <AnimatePresence>
