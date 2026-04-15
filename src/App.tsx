@@ -1340,6 +1340,18 @@ const RequestDetailPage = () => {
   const [editUrgency, setEditUrgency] = useState('');
   const [editCategory, setEditCategory] = useState('');
 
+  const [actionLabel, setActionLabel] = useState<'Valid' | 'Suspicious' | null>(null);
+  const [valPhoto, setValPhoto] = useState<string | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleValidationSubmit = () => {
+    if (!user) return;
+    if (actionLabel === 'Valid') validateRequest(id, user.uid);
+    if (actionLabel === 'Suspicious') flagRequest(id, user.uid);
+    setActionLabel(null);
+    setValPhoto(null);
+  };
+
   const request = requests.find(r => r.id === id);
   const requestDonations = donations.filter(d => d.requestId === id);
   const requestVerifications = verifications.filter(v => v.requestId === id);
@@ -1678,7 +1690,7 @@ const RequestDetailPage = () => {
           <div className="flex gap-3">
             <motion.button
               whileTap={{ scale: 0.95 }}
-              onClick={() => user && validateRequest(request.id, user.uid)}
+              onClick={() => { if (user) setActionLabel('Valid'); else alert("Log in to validate."); }}
               className={`flex-1 flex items-center justify-center gap-2 h-14 rounded-2xl border-4 border-black font-black uppercase text-xs tracking-widest transition-all ${(request.validatedBy || []).includes(user?.uid || '')
                 ? 'bg-green-500 text-black shadow-none translate-x-0.5 translate-y-0.5'
                 : 'bg-green-100 text-green-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-green-200'
@@ -1689,7 +1701,7 @@ const RequestDetailPage = () => {
             </motion.button>
             <motion.button
               whileTap={{ scale: 0.95 }}
-              onClick={() => user && flagRequest(request.id, user.uid)}
+              onClick={() => { if (user) setActionLabel('Suspicious'); else alert("Log in to flag."); }}
               className={`flex-1 flex items-center justify-center gap-2 h-14 rounded-2xl border-4 border-black font-black uppercase text-xs tracking-widest transition-all ${(request.flaggedBy || []).includes(user?.uid || '')
                 ? 'bg-red-500 text-white shadow-none translate-x-0.5 translate-y-0.5'
                 : 'bg-red-100 text-red-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-red-200'
@@ -1699,6 +1711,57 @@ const RequestDetailPage = () => {
               Suspicious ({request.flagCount || 0})
             </motion.button>
           </div>
+
+          <Dialog open={!!actionLabel} onOpenChange={(open) => !open && setActionLabel(null)}>
+            <DialogContent className="border-4 border-black rounded-[2rem] p-6 max-w-sm">
+              <DialogHeader>
+                <DialogTitle className={`text-2xl font-black italic uppercase tracking-tighter ${actionLabel === 'Valid' ? 'text-green-600' : 'text-red-600'}`}>
+                  Mark as {actionLabel}
+                </DialogTitle>
+                <DialogDescription className="font-bold text-gray-600">
+                  Please provide visual evidence to back up your claim.
+                </DialogDescription>
+              </DialogHeader>
+
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="mt-4 h-48 border-4 border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center bg-gray-50 cursor-pointer overflow-hidden relative group"
+              >
+                {valPhoto ? (
+                  <img src={valPhoto} className="w-full h-full object-cover" />
+                ) : (
+                  <>
+                    <Camera size={32} className="text-gray-400 mb-2 group-hover:text-black transition-colors" />
+                    <span className="font-black text-xs text-gray-400 tracking-widest uppercase group-hover:text-black transition-colors">Tap to upload the photo</span>
+                  </>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  ref={fileInputRef}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => setValPhoto(reader.result as string);
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                />
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <Button onClick={() => setActionLabel(null)} className="flex-1 bg-gray-200 text-black border-2 border-black font-black uppercase text-xs h-12">Cancel</Button>
+                <Button
+                  onClick={handleValidationSubmit}
+                  className={`flex-1 text-white border-2 border-black font-black uppercase text-xs h-12 ${actionLabel === 'Valid' ? 'bg-green-500 hover:bg-green-600 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]' : 'bg-red-500 hover:bg-red-600 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'}`}
+                >
+                  Submit {actionLabel}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
           {!user && (
             <p className="text-center text-xs font-bold text-gray-400 mt-3">Log in to vote on this request</p>
           )}
