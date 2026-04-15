@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { CharityRequest, Donation, Verification, Review, Fulfillment } from '../types';
-import { databases, storage, ID } from '../lib/appwrite';
+import { databases, storage, ID, Query } from '../lib/appwrite';
 
 const DB_ID = 'main_db';
 const REQ_COL_ID = 'requests_col';
@@ -71,7 +71,10 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
 
     const loadRequests = async () => {
         try {
-            const response = await databases.listDocuments(DB_ID, REQ_COL_ID);
+            const response = await databases.listDocuments(DB_ID, REQ_COL_ID, [
+                Query.orderDesc('createdAt'),
+                Query.limit(100)
+            ]);
             const mapped = response.documents.map(mapDoc);
             // Filter out soft-deleted documents
             const active = mapped.filter(r => r.status !== 'Deleted');
