@@ -348,9 +348,9 @@ const UPIDonationModal: React.FC<{
           {/* UPI Deep Link Buttons */}
           <div className="grid grid-cols-3 gap-3">
             {[
-              { name: 'Google Pay', scheme: `gpay://upi/pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(title)}&am=${amount}&cu=INR`, color: 'bg-blue-50 border-blue-200', emoji: '🟢' },
-              { name: 'PhonePe', scheme: `phonepe://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(title)}&am=${amount}&cu=INR`, color: 'bg-purple-50 border-purple-200', emoji: '🟣' },
-              { name: 'Paytm', scheme: `paytmmp://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(title)}&am=${amount}&cu=INR`, color: 'bg-sky-50 border-sky-200', emoji: '🔵' },
+              { name: 'GPay', scheme: `gpay://upi/pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(title)}&am=${amount}&cu=INR`, color: 'bg-white border-gray-200', logo: 'https://upload.wikimedia.org/wikipedia/commons/f/f2/Google_Pay_Logo.svg' },
+              { name: 'PhonePe', scheme: `phonepe://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(title)}&am=${amount}&cu=INR`, color: 'bg-white border-purple-200', logo: 'https://upload.wikimedia.org/wikipedia/commons/7/71/PhonePe_Logo.svg' },
+              { name: 'Paytm', scheme: `paytmmp://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(title)}&am=${amount}&cu=INR`, color: 'bg-white border-sky-200', logo: 'https://upload.wikimedia.org/wikipedia/commons/2/24/Paytm_Logo_%28standalone%29.svg' },
             ].map(app => (
               <button
                 key={app.name}
@@ -360,10 +360,9 @@ const UPIDonationModal: React.FC<{
                   a.click();
                   setTimeout(() => setNotInstalled(true), 1500);
                 }}
-                className={`p-3 ${app.color} border-2 rounded-2xl flex flex-col items-center gap-1 font-black text-[10px] uppercase tracking-widest hover:opacity-80 transition-opacity`}
+                className={`p-2 ${app.color} border-2 rounded-2xl flex flex-col items-center justify-center gap-2 hover:opacity-80 transition-opacity`}
               >
-                <span className="text-2xl">{app.emoji}</span>
-                {app.name}
+                <img src={app.logo} alt={app.name} className="h-6 object-contain" />
               </button>
             ))}
           </div>
